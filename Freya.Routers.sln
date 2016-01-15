@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{C328A697-C525-4D90-BD45-FB9C681EEB5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A89B47E3-9099-4043-8BBF-109C6A4B74B0}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers", "src\Freya.Routers\Freya.Routers.fsproj", "{947E950B-DC5E-488E-AF69-5DEB6FB41EC5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{51C80278-0EA4-492B-BA43-F60AAC69B242}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F5F89FCF-6655-4A19-8AB0-7E4823D91AC5}"
+	ProjectSection(SolutionItems) = preProject
+		src\Freya.Routers\Freya.Routers.fsproj.paket.references = src\Freya.Routers\Freya.Routers.fsproj.paket.references
+		src\Freya.Routers.UriTemplate\Freya.Routers.UriTemplate.fsproj.paket.references = src\Freya.Routers.UriTemplate\Freya.Routers.UriTemplate.fsproj.paket.references
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.UriTemplate", "src\Freya.Routers.UriTemplate\Freya.Routers.UriTemplate.fsproj", "{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CD0251CD-035A-41CA-9723-36CE59F64E75}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.UriTemplate.Tests", "tests\Freya.Routers.UriTemplate.Tests\Freya.Routers.UriTemplate.Tests.fsproj", "{012C0F67-8495-4470-B01E-CE5BA5862476}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Freya.Routers.UriTemplate.Tests\Freya.Routers.UriTemplate.Tests.fsproj.paket.references = tests\Freya.Routers.UriTemplate.Tests\Freya.Routers.UriTemplate.Tests.fsproj.paket.references
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{012C0F67-8495-4470-B01E-CE5BA5862476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{012C0F67-8495-4470-B01E-CE5BA5862476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{012C0F67-8495-4470-B01E-CE5BA5862476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{012C0F67-8495-4470-B01E-CE5BA5862476}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5} = {A89B47E3-9099-4043-8BBF-109C6A4B74B0}
+		{51C80278-0EA4-492B-BA43-F60AAC69B242} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
+		{4B6785A1-9591-4A0B-B0E8-8B59E45D27D6} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
+		{F5F89FCF-6655-4A19-8AB0-7E4823D91AC5} = {4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}
+		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD} = {A89B47E3-9099-4043-8BBF-109C6A4B74B0}
+		{012C0F67-8495-4470-B01E-CE5BA5862476} = {CD0251CD-035A-41CA-9723-36CE59F64E75}
+		{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4} = {4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}
+	EndGlobalSection
+EndGlobal
