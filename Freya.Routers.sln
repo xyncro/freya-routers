@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
+		paket.lock = paket.lock
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F5F89FCF-6655-4A19-8AB0-7E4823D91AC5}"
@@ -34,6 +35,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4}"
 	ProjectSection(SolutionItems) = preProject
 		tests\Freya.Routers.UriTemplate.Tests\Freya.Routers.UriTemplate.Tests.fsproj.paket.references = tests\Freya.Routers.UriTemplate.Tests\Freya.Routers.UriTemplate.Tests.fsproj.paket.references
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{C03E0A0F-1E57-408D-9212-927013CBD65D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B1BD241-6129-4949-8656-2DA32312492F}"
+	ProjectSection(SolutionItems) = preProject
+		src\Freya.Routers\Freya.Routers.fsproj.paket.template = src\Freya.Routers\Freya.Routers.fsproj.paket.template
+		src\Freya.Routers.UriTemplate\Freya.Routers.UriTemplate.fsproj.paket.template = src\Freya.Routers.UriTemplate\Freya.Routers.UriTemplate.fsproj.paket.template
 	EndProjectSection
 EndProject
 Global
@@ -66,5 +75,7 @@ Global
 		{F240FFAF-71D8-4B85-9AD2-49DAA5C193BD} = {A89B47E3-9099-4043-8BBF-109C6A4B74B0}
 		{012C0F67-8495-4470-B01E-CE5BA5862476} = {CD0251CD-035A-41CA-9723-36CE59F64E75}
 		{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4} = {4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}
+		{C03E0A0F-1E57-408D-9212-927013CBD65D} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
+		{8B1BD241-6129-4949-8656-2DA32312492F} = {C03E0A0F-1E57-408D-9212-927013CBD65D}
 	EndGlobalSection
 EndGlobal

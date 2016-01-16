@@ -192,17 +192,6 @@ module internal Graphs =
 
         let rec private addRoute current graph (precedence, route) =
             match route with
-            | Next (part, route) ->
-                let node =
-                    composeKeys current (Key (string part))
-
-                let graph =
-                    ((fun graph ->
-                        (match Graph.Nodes.contains node graph with
-                         | false -> addNode node >> addEdge current node part
-                         | _ -> id) graph) ^% compilationGraph_) graph
-
-                addRoute node graph (precedence, route)
             | Last (predicate, part, pipe) ->
                 let node =
                     composeKeys current (Key (string part))
@@ -214,6 +203,17 @@ module internal Graphs =
                          | _ -> updateNode node precedence predicate pipe) graph) ^% compilationGraph_) graph
 
                 graph
+            | Next (part, route) ->
+                let node =
+                    composeKeys current (Key (string part))
+
+                let graph =
+                    ((fun graph ->
+                        (match Graph.Nodes.contains node graph with
+                         | false -> addNode node >> addEdge current node part
+                         | _ -> id) graph) ^% compilationGraph_) graph
+
+                addRoute node graph (precedence, route)
             | _ ->
                 graph
 

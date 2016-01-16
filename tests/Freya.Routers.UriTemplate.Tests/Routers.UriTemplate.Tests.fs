@@ -76,7 +76,9 @@ let ``Router With Base Route Executes Correctly`` () =
         freyaRouter {
             route All "/" route1 }
 
-    value GET "/" emptyQuery routes =! Some 1
+    let v = value GET "/" emptyQuery routes
+
+    v =! Some 1
 
 [<Fact>]
 let ``Router With Multiple Routes Executes Correctly`` () =
