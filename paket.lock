@@ -1,7 +1,7 @@
 NUGET
   remote: http://www.nuget.org/api/v2
   specs:
-    Aether (8.1.1)
+    Aether (8.1.2)
     Arachne.Core (3.0.0-b104)
       FParsec (>= 1.0.0 < 2.0.0)
     Arachne.Http (3.0.0-b104)
@@ -20,11 +20,11 @@ NUGET
       Arachne.Uri (>= 3.0.0-b104)
       FParsec (>= 1.0.0 < 2.0.0)
     FParsec (1.0.2)
-    Hekate (3.0.0)
+    Hekate (3.2.0)
       Aether (>= 8.0.2 < 9.0.0)
   remote: http://www.myget.org/F/freya/api/v2
   specs:
-    Freya.Core (4.0.0-b001)
+    Freya.Core (4.0.0-b002)
       Aether (>= 8.1.0 < 9.0.0)
     Freya.Optics (4.0.0-b001)
       Aether (>= 8.1.0 < 9.0.0)
@@ -39,7 +39,7 @@ GROUP Build
 NUGET
   remote: http://www.nuget.org/api/v2
   specs:
-    FAKE (4.14.5)
+    FAKE (4.17.1)
 GITHUB
   remote: xyncro/build
   specs:
@@ -49,7 +49,7 @@ FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
   specs:
-    Unquote (3.1.0)
+    Unquote (3.1.1)
     xunit (2.1.0)
       xunit.assert (2.1.0)
       xunit.core (2.1.0)

@@ -500,15 +500,52 @@ type UriTemplateRouter =
             (snd (c (Routes []))))
 
     static member Pipeline (Router c) : Pipeline =
-        Graphs.Reification.reify (Optic.get
-            (Lens.ofIsomorphism UriTemplateRoutes.routes_)
-            (snd (c (Routes []))))
+        UriTemplateRouter.Freya (Router c)
 
  and UriTemplateRoutes =
     | Routes of UriTemplateRoute list
 
     static member routes_ =
         (fun (Routes x) -> x), (Routes)
+
+(* Functions
+
+   Functions implementing common monadic operations on the Router type,
+   which will be used to implement the computation expression builder.
+
+   Additionally some extensions to the basic requirements for a computation
+   expression are included, including mapping over the inner state. *)
+
+[<RequireQualifiedAccess>]
+[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
+module UriTemplateRouter =
+
+    (* Common *)
+
+    let init _ : UriTemplateRouter =
+        Router (fun c ->
+            (), c)
+
+    let bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
+        Router (fun c ->
+            let (Router m) = m
+            let (Router f) = f ()
+
+            (), snd (f (snd (m c))))
+
+    (* Custom *)
+
+    let inline map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
+        Router (fun c ->
+            let (Router m) = m
+
+            (), f (snd (m c)))
+
+    (* Operations *)
+
+    let operations =
+        { Configuration.Operations.Init = init
+          Configuration.Operations.Bind = bind }
 
 (* Inference
 
@@ -570,48 +607,6 @@ module Infer =
     let inline uriTemplateRouteMethod x =
         UriTemplateRouteMethod.infer x
 
-(* Router
-
-   Functions implementing common monadic operations on the Router type,
-   which will be used to implement the computation expression builder.
-   
-   Additionally some extensions to the basic requirements for a computation
-   expression are included, including mapping over the inner state. *)
-
-[<RequireQualifiedAccess>]
-module Router =
-
-    (* Common *)
-
-    let bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
-        Router (fun c ->
-            let (Router m) = m
-            let (Router f) = f ()
-
-            (), snd (f (snd (m c))))
-
-    let combine (m1: UriTemplateRouter, m2: UriTemplateRouter) : UriTemplateRouter =
-        Router (fun c ->
-            let (Router m1) = m1
-            let (Router m2) = m2
-
-            (), snd (m2 (snd (m1 c))))
-
-    let init _ : UriTemplateRouter =
-        Router (fun c ->
-            (), c)
-
-    let initFrom (m: UriTemplateRouter) : UriTemplateRouter =
-        m
-
-    (* Custom *)
-
-    let inline map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
-        Router (fun c ->
-            let (Router m) = m
-
-            (), f (snd (m c)))
-
 (* Builder
 
    Computation expression builder for configuring the URI Template Router,
@@ -619,26 +614,15 @@ module Router =
    single functions. *)
 
 type UriTemplateRouterBuilder () =
+    inherit Configuration.Builder<UriTemplateRouter> (UriTemplateRouter.operations)
 
-    (* Common *)
+(* Syntax *)
 
-    member __.Bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
-        Router.bind (m, f)
-
-    member __.Return _ : UriTemplateRouter =
-        Router.init ()
-
-    member __.ReturnFrom (m: UriTemplateRouter) : UriTemplateRouter =
-        Router.initFrom (m)
-
-    member __.Combine (m1: UriTemplateRouter, m2: UriTemplateRouter) : UriTemplateRouter =
-        Router.combine (m1, m2)
-
-    (* Custom *)
+type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
-    member inline __.Route (m, meth, template, pipeline) =
-        Router.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
+    member inline __.Route (m, meth, template, pipeline) : UriTemplateRouter =
+        UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
             r @ [ { Predicate = Method (Infer.uriTemplateRouteMethod meth)
                     Specification = Path
                     Template = Infer.uriTemplate template
