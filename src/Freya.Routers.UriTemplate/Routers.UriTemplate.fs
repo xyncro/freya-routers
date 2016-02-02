@@ -492,21 +492,21 @@ module internal Graphs =
    approaches of the basic Freya function, and Pipelines. *)
 
 type UriTemplateRouter =
-    | Router of (UriTemplateRoutes -> unit * UriTemplateRoutes)
+    | UriTemplateRouter of (UriTemplateRoutes -> unit * UriTemplateRoutes)
 
-    static member Freya (Router c) : Freya<_> =
+    static member Freya (UriTemplateRouter c) : Freya<_> =
         Graphs.Reification.reify (Optic.get
             (Lens.ofIsomorphism UriTemplateRoutes.routes_)
-            (snd (c (Routes []))))
+            (snd (c (UriTemplateRoutes []))))
 
-    static member Pipeline (Router c) : Pipeline =
-        UriTemplateRouter.Freya (Router c)
+    static member Pipeline (UriTemplateRouter c) : Pipeline =
+        UriTemplateRouter.Freya (UriTemplateRouter c)
 
  and UriTemplateRoutes =
-    | Routes of UriTemplateRoute list
+    | UriTemplateRoutes of UriTemplateRoute list
 
     static member routes_ =
-        (fun (Routes x) -> x), (Routes)
+        (fun (UriTemplateRoutes x) -> x), (UriTemplateRoutes)
 
 (* Functions
 
@@ -523,21 +523,21 @@ module UriTemplateRouter =
     (* Common *)
 
     let init _ : UriTemplateRouter =
-        Router (fun c ->
+        UriTemplateRouter (fun c ->
             (), c)
 
     let bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
-        Router (fun c ->
-            let (Router m) = m
-            let (Router f) = f ()
+        UriTemplateRouter (fun c ->
+            let (UriTemplateRouter m) = m
+            let (UriTemplateRouter f) = f ()
 
             (), snd (f (snd (m c))))
 
     (* Custom *)
 
     let inline map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
-        Router (fun c ->
-            let (Router m) = m
+        UriTemplateRouter (fun c ->
+            let (UriTemplateRouter m) = m
 
             (), f (snd (m c)))
 
@@ -618,11 +618,14 @@ type UriTemplateRouterBuilder () =
 
 (* Syntax *)
 
+let private routes_ =
+    Lens.ofIsomorphism UriTemplateRoutes.routes_
+
 type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
     member inline __.Route (m, meth, template, pipeline) : UriTemplateRouter =
-        UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
+        UriTemplateRouter.map (m, Optic.map routes_ (fun r ->
             r @ [ { Predicate = Method (Infer.uriTemplateRouteMethod meth)
                     Specification = Path
                     Template = Infer.uriTemplate template
