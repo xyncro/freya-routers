@@ -618,14 +618,11 @@ type UriTemplateRouterBuilder () =
 
 (* Syntax *)
 
-let private routes_ =
-    Lens.ofIsomorphism UriTemplateRoutes.routes_
-
 type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
     member inline __.Route (m, meth, template, pipeline) : UriTemplateRouter =
-        UriTemplateRouter.map (m, Optic.map routes_ (fun r ->
+        UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
             r @ [ { Predicate = Method (Infer.uriTemplateRouteMethod meth)
                     Specification = Path
                     Template = Infer.uriTemplate template
