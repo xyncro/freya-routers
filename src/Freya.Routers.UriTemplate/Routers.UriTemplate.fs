@@ -84,7 +84,7 @@ module Route =
    being compiled in to a traversable n-ary tree based on URI Template
    components and then evaluated to find the set of matching leaves. *)
 
-[<AutoOpen>]
+[<RequireQualifiedAccess>]
 module internal Graphs =
 
     (* Compilation
@@ -482,71 +482,6 @@ module internal Graphs =
    and flexible API (for example, accepting a Method or list of Methods
    transparently). *)
 
-(* Types
-
-   The basic types of configuration, the Router (configuration) function, and
-   the actual configuration data threaded through configuration functions.
-
-   The function itself is defined as a single case discriminated union so that
-   it can have static members, allowing it to take part in the static inference
-   approaches of the basic Freya function, and Pipelines. *)
-
-type UriTemplateRouter =
-    | UriTemplateRouter of (UriTemplateRoutes -> unit * UriTemplateRoutes)
-
-    static member Freya (UriTemplateRouter c) : Freya<_> =
-        Graphs.Reification.reify (Optic.get
-            (Lens.ofIsomorphism UriTemplateRoutes.routes_)
-            (snd (c (UriTemplateRoutes []))))
-
-    static member Pipeline (UriTemplateRouter c) : Pipeline =
-        UriTemplateRouter.Freya (UriTemplateRouter c)
-
- and UriTemplateRoutes =
-    | UriTemplateRoutes of UriTemplateRoute list
-
-    static member routes_ =
-        (fun (UriTemplateRoutes x) -> x), (UriTemplateRoutes)
-
-(* Functions
-
-   Functions implementing common monadic operations on the Router type,
-   which will be used to implement the computation expression builder.
-
-   Additionally some extensions to the basic requirements for a computation
-   expression are included, including mapping over the inner state. *)
-
-[<RequireQualifiedAccess>]
-[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
-module UriTemplateRouter =
-
-    (* Common *)
-
-    let init _ : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            (), c)
-
-    let bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            let (UriTemplateRouter m) = m
-            let (UriTemplateRouter f) = f ()
-
-            (), snd (f (snd (m c))))
-
-    (* Custom *)
-
-    let inline map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            let (UriTemplateRouter m) = m
-
-            (), f (snd (m c)))
-
-    (* Operations *)
-
-    let operations =
-        { Configuration.Operations.Init = init
-          Configuration.Operations.Bind = bind }
-
 (* Inference
 
    Pseudo-Typeclass style static inference for Methods and for URI Templates,
@@ -607,6 +542,55 @@ module Infer =
     let inline uriTemplateRouteMethod x =
         UriTemplateRouteMethod.infer x
 
+(* Types
+
+   The basic types of configuration, the Router (configuration) function, and
+   the actual configuration data threaded through configuration functions.
+
+   The function itself is defined as a single case discriminated union so that
+   it can have static members, allowing it to take part in the static inference
+   approaches of the basic Freya function, and Pipelines. *)
+
+type UriTemplateRouter =
+    | UriTemplateRouter of (UriTemplateRoutes -> unit * UriTemplateRoutes)
+
+    (* Common *)
+
+    static member Init _ : UriTemplateRouter =
+        UriTemplateRouter (fun c ->
+            (), c)
+
+    static member Bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
+        UriTemplateRouter (fun c ->
+            let (UriTemplateRouter m) = m
+            let (UriTemplateRouter f) = f ()
+
+            (), snd (f (snd (m c))))
+
+    (* Custom *)
+
+    static member Map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
+        UriTemplateRouter (fun c ->
+            let (UriTemplateRouter m) = m
+
+            (), f (snd (m c)))
+
+    (* Typeclasses *)
+
+    static member Freya (UriTemplateRouter router) : Freya<_> =
+        Graphs.Reification.reify (Optic.get
+            (Lens.ofIsomorphism UriTemplateRoutes.routes_)
+            (snd (router (UriTemplateRoutes []))))
+
+    static member Pipeline (UriTemplateRouter router) : Pipeline =
+        UriTemplateRouter.Freya (UriTemplateRouter router)
+
+ and UriTemplateRoutes =
+    | UriTemplateRoutes of UriTemplateRoute list
+
+    static member routes_ =
+        (fun (UriTemplateRoutes x) -> x), (UriTemplateRoutes)
+
 (* Builder
 
    Computation expression builder for configuring the URI Template Router,
@@ -614,7 +598,9 @@ module Infer =
    single functions. *)
 
 type UriTemplateRouterBuilder () =
-    inherit Configuration.Builder<UriTemplateRouter> (UriTemplateRouter.operations)
+    inherit Configuration.Builder<UriTemplateRouter>
+        { Init = UriTemplateRouter.Init
+          Bind = UriTemplateRouter.Bind }
 
 (* Syntax *)
 
@@ -622,7 +608,7 @@ type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
     member inline __.Route (m, meth, template, pipeline) : UriTemplateRouter =
-        UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
+        UriTemplateRouter.Map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
             r @ [ { Predicate = Method (Infer.uriTemplateRouteMethod meth)
                     Specification = Path
                     Template = Infer.uriTemplate template
