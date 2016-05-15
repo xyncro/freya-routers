@@ -26,10 +26,10 @@ module internal Prelude =
           Meta = meta () }
 
     let get =
-        Optic.get (State.value_ "test")
+        Optic.get (Freya.State.value_ "test")
 
     let set i =
-        Freya.Optic.set (State.value_ "test") i *> Pipeline.next
+        Freya.Optic.set (Freya.State.value_ "test") i *> Pipeline.next
 
     let run meth path query m =
         Async.RunSynchronously ((   Freya.Optic.set Request.method_ meth
