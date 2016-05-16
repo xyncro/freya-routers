@@ -153,7 +153,7 @@ module UriTemplate =
 module Route =
 
     let data_ =
-            Freya.State.value_ "freya.routers.uritemplate.data"
+            State.value_ "freya.routers.uritemplate.data"
         >-> Option.unsafe_
 
     let value_ key =

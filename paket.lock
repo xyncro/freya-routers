@@ -24,16 +24,16 @@ NUGET
       Aether (>= 8.0.2 < 9.0)
   remote: http://www.myget.org/F/freya/api/v2
   specs:
-    Freya.Core (4.0.0-b009)
+    Freya.Core (4.0.0-b010)
       Aether (>= 8.1 < 9.0)
-    Freya.Optics (4.0.0-b003)
+    Freya.Optics (4.0.0-b004)
       Aether (>= 8.1 < 9.0)
-    Freya.Optics.Http (4.0.0-b003)
+    Freya.Optics.Http (4.0.0-b004)
       Aether (>= 8.1 < 9.0)
       Arachne.Http (>= 3.0.0-b < 3.1)
       Arachne.Uri (>= 3.0.0-b < 3.1)
       Freya.Core (>= 4.0.0-b < 4.1)
-      Freya.Optics (>= 4.0.0-b003)
+      Freya.Optics (>= 4.0.0-b004)
 
 GROUP Build
 NUGET
