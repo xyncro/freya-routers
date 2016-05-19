@@ -27,6 +27,8 @@ type UriTemplateRouterBuilder () =
         { Init = UriTemplateRouter.init
           Bind = UriTemplateRouter.bind }
 
+(* Operations *)
+
 type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]

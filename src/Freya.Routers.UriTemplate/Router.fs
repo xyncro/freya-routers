@@ -13,10 +13,7 @@ open Freya.Routers
    where a matched route includes a pipeline to be run on a match, and which is
    returned as the result of router execution. *)
 
-type UriTemplateRouter =
-    | UriTemplateRouter of (UriTemplateRoutes -> unit * UriTemplateRoutes)
-
- and UriTemplateRoutes =
+type UriTemplateRoutes =
     | UriTemplateRoutes of UriTemplateRoute list
 
     static member routes_ =
@@ -39,39 +36,6 @@ type UriTemplateRouter =
  and UriTemplateRouteSpecification =
     | Path
     | PathAndQuery
-
-(* UriTemplateRouter
-
-   Functions defined against UriTemplateRouter, chiefly the simple monadic init
-   and bind functions to enable the creation of a computation expression
-   builder, plus a function to convert a router to a Pipeline, which will be
-   used when defining the appropriate static members to allow the type to take
-   part in static inference to either Freya<_> or Pipeline functions. *)
-
-[<RequireQualifiedAccess>]
-[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
-module UriTemplateRouter =
-
-    (* Common *)
-
-    let init _ : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            (), c)
-
-    let bind (m: UriTemplateRouter, f: unit -> UriTemplateRouter) : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            let (UriTemplateRouter m) = m
-            let (UriTemplateRouter f) = f ()
-
-            (), snd (f (snd (m c))))
-
-    (* Custom *)
-
-    let map (m: UriTemplateRouter, f: UriTemplateRoutes -> UriTemplateRoutes) : UriTemplateRouter =
-        UriTemplateRouter (fun c ->
-            let (UriTemplateRouter m) = m
-
-            (), f (snd (m c)))
 
 (* UriTemplateRouteMethod
 
