@@ -1,64 +1,11 @@
-﻿module Freya.Routers.UriTemplate.Tests
+﻿[<AutoOpen>]
+module Freya.Routers.UriTemplate.Tests.Routing
 
-open System.Collections.Generic
-open Aether
 open Arachne.Http
 open Freya.Core
-open Freya.Core.Operators
-open Freya.Optics.Http
 open Freya.Routers.UriTemplate
 open Swensen.Unquote
 open Xunit
-
-(* Prelude *)
-
-[<AutoOpen>]
-module internal Prelude =
-
-    let private environment () =
-        Dictionary<string, obj> () :> IDictionary<string, obj>
-
-    let private meta () =
-        { Memos = Map.empty }
-
-    let private state () =
-        { Environment = environment ()
-          Meta = meta () }
-
-    let get =
-        Optic.get (State.value_ "test")
-
-    let set i =
-        Freya.Optic.set (State.value_ "test") i *> Pipeline.next
-
-    let run meth path query m =
-        Async.RunSynchronously ((   Freya.Optic.set Request.method_ meth
-                                 *> Freya.Optic.set Request.path_ path
-                                 *> Freya.Optic.set Request.query_ query
-                                 *> UriTemplateRouter.Pipeline m) (state ()))
-
-    let result meth path query m =
-        fst (run meth path query m)
-
-    let value meth path query m =
-        get (snd (run meth path query m))
-
-(* Mocks *)
-
-[<AutoOpen>]
-module internal Examples =
-
-    let route1 =
-        set (Some 1)
-
-    let route2 =
-        set (Some 2)
-
-    let route3 =
-        set (Some 3)
-
-    let emptyQuery =
-        Arachne.Uri.Query ""
 
 (* Tests *)
 

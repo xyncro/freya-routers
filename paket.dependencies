@@ -19,7 +19,9 @@ group Test
 
   framework: >= net45
   source http://nuget.org/api/v2
+  source http://www.myget.org/F/freya/api/v2
 
+  nuget Freya.Testing        ~> 4.0.0-b
   nuget Unquote
   nuget xunit
   nuget xunit.runner.console

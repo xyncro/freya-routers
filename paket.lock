@@ -49,6 +49,7 @@ FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
   specs:
+    Aether (8.1.2)
     Unquote (3.1.1)
     xunit (2.1)
       xunit.assert (2.1)
@@ -63,3 +64,11 @@ NUGET
     xunit.extensibility.execution (2.1)
       xunit.extensibility.core (2.1)
     xunit.runner.console (2.1)
+  remote: http://www.myget.org/F/freya/api/v2
+  specs:
+    Freya.Core (4.0.0-b010)
+      Aether (>= 8.1 < 9.0)
+    Freya.Testing (4.0.0-b006)
+      Aether (>= 8.1 < 9.0)
+      Freya.Core (>= 4.0.0-b < 4.1)
+      Unquote

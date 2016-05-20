@@ -2,9 +2,8 @@
 Arachne.Uri.Template
 Freya.Core
 Freya.Optics.Http
-Hekate
 
 group Test
 
-  Unquote
+  Freya.Testing
   xunit
