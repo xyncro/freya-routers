@@ -58,8 +58,7 @@
   -->
   <ItemGroup>
     <Compile Include="Prelude.fs" />
-    <Compile Include="Fixtures.fs" />
-    <Compile Include="Routing.fs" />
+    <Compile Include="Matching.fs" />
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
