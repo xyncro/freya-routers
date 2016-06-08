@@ -61,6 +61,7 @@
     <Compile Include="Compilation.fs" />
     <Compile Include="Evaluation.fs" />
     <Compile Include="Extension.fs" />
+    <Compile Include="Inference.fs" />
     <Compile Include="Expression.fs" />
   </ItemGroup>
   <ItemGroup>
