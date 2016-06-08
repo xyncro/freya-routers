@@ -68,7 +68,7 @@ NUGET
   specs:
     Freya.Core (4.0.0-b011)
       Aether (>= 8.1 < 9.0)
-    Freya.Testing (4.0.0-b007)
+    Freya.Testing (4.0.0-b008)
       Aether (>= 8.1 < 9.0)
       Freya.Core (>= 4.0.0-b < 4.1)
       Unquote
