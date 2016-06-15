@@ -2,9 +2,9 @@
 
 open Aether
 open Aether.Operators
-open Arachne.Http
-open Arachne.Uri.Template
 open Freya.Core
+open Freya.Types.Http
+open Freya.Types.Uri.Template
 open Freya.Routers
 
 (* Types

@@ -1,12 +1,13 @@
 source http://nuget.org/api/v2
 source http://www.myget.org/F/freya/api/v2
 
-nuget Aether               ~> 8.1
-nuget Arachne.Http         ~> 3.0.0-b
-nuget Arachne.Uri.Template ~> 3.0.0-b
-nuget Freya.Core           ~> 4.0.0-b
-nuget Freya.Optics.Http    ~> 4.0.0-b
-nuget Hekate               ~> 3
+nuget Aether                   ~> 8.1
+nuget Freya.Core               ~> 4.0.0-b
+nuget Freya.Optics.Http        ~> 4.0.0-b
+nuget Freya.Types.Http         ~> 4.0.0-b
+nuget Freya.Types.Uri          ~> 4.0.0-b
+nuget Freya.Types.Uri.Template ~> 4.0.0-b
+nuget Hekate                   ~> 3
 
 group Build
 

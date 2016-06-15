@@ -1,7 +1,7 @@
 ﻿namespace Freya.Routers.UriTemplate
 
-open Arachne.Http
-open Arachne.Uri.Template
+open Freya.Types.Http
+open Freya.Types.Uri.Template
 
 (* Inference *)
 

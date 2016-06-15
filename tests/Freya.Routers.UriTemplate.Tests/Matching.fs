@@ -1,13 +1,13 @@
 ﻿[<AutoOpen>]
 module Freya.Routers.UriTemplate.Tests.Matching
 
-open Arachne.Http
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Optics.Http
 open Freya.Routers.UriTemplate
 open Freya.Testing
 open Freya.Testing.Operators
+open Freya.Types.Http
 open Xunit
 
 (* Matching

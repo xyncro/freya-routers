@@ -2,9 +2,9 @@
 
 open Aether
 open Aether.Operators
-open Arachne.Uri.Template
 open FParsec
 open Freya.Core
+open Freya.Types.Uri.Template
 open Hekate
 
 (* Types

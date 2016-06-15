@@ -2,12 +2,12 @@
 
 open Aether
 open Aether.Operators
-open Arachne.Http
-open Arachne.Uri
-open Arachne.Uri.Template
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Optics.Http
+open Freya.Types.Http
+open Freya.Types.Uri
+open Freya.Types.Uri.Template
 open Hekate
 
 (* Evaluation

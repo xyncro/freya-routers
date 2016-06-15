@@ -1,7 +1,8 @@
 ﻿Aether
-Arachne.Uri.Template
 Freya.Core
 Freya.Optics.Http
+Freya.Types.Http
+Freya.Types.Uri.Template
 
 group Test
 

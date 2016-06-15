@@ -3,7 +3,6 @@ module Freya.Routers.UriTemplate.Tests.Prelude
 
 open Aether
 open Freya.Core
-open Freya.Core.Operators
 
 (* Optics *)
 
