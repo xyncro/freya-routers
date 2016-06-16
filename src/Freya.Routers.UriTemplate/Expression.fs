@@ -41,6 +41,14 @@ type UriTemplateRouterBuilder with
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
 
+    [<CustomOperation ("resource", MaintainsVariableSpaceUsingBind = true)>]
+    member inline __.Resource (m, template, pipeline) : UriTemplateRouter =
+        UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
+            r @ [ { Predicate = Method (All)
+                    Specification = Path
+                    Template = UriTemplate.infer template
+                    Pipeline = Pipeline.infer pipeline } ]))
+
 (* Builder
 
    The instance of UriTemplateRouterBuilder which will be used to provide the
