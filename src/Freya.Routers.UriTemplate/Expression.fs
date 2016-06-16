@@ -1,5 +1,7 @@
 ﻿namespace Freya.Routers.UriTemplate
 
+#nowarn "46"
+
 open Aether
 open Freya.Core
 
@@ -8,7 +10,7 @@ open Freya.Core
    A minimal computation expression for defining routers given ordered routes,
    defining a method and path specification, and a pipeline function to be
    returned when the route is the highest matched route under evaluation.
-   
+
    The UriTemplateRouter type here would ordinarily be defined as part of the
    general set of types core to the system, but in this case must be defined
    late to be able to be augmented here due to the F# restriction on type
@@ -32,9 +34,9 @@ type UriTemplateRouterBuilder () =
 type UriTemplateRouterBuilder with
 
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
-    member inline __.Route (m, meth, template, pipeline) : UriTemplateRouter =
+    member inline __.Route (m, method, template, pipeline) : UriTemplateRouter =
         UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
-            r @ [ { Predicate = Method (UriTemplateRouteMethod.infer meth)
+            r @ [ { Predicate = Method (UriTemplateRouteMethod.infer method)
                     Specification = Path
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
