@@ -5,6 +5,8 @@ open Aether.Operators
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Optics.Http
+open Freya.Polyfills
+open Freya.Routers
 open Freya.Types.Http
 open Freya.Types.Uri
 open Freya.Types.Uri.Template
@@ -73,6 +75,31 @@ type internal Traversal =
     static member data_ =
         (fun (Data d) -> d), (fun d (Data (_)) -> Data (d))
 
+(* Request
+
+   Optics and functions for working with the request to get a raw form path and
+   query value. *)
+
+[<RequireQualifiedAccess>]
+module internal Request =
+
+    let private queryString_ =
+            State.value_<string> "owin.RequestQueryString"
+        >-> Option.unsafe_
+
+    let private merge =
+        function | p, q when q <> "" -> sprintf "%s?%s" p q
+                 | p, _ -> p
+
+    let pathAndQuery =
+            fun pr p q ->
+                match pr, p, q with
+                | Some pr, _, q -> merge (pr, q)
+                | _, p, q -> merge (p, q)
+        <!> !. Request.pathRaw_
+        <*> !. Request.path_
+        <*> !. queryString_
+
 (* Evaluation
 
    Functions for the evaluation of a compiled routing graph. *)
@@ -87,12 +114,7 @@ module internal Evaluation =
         traversal, starting at the tree root and capturing no data, with a
         starting path, and an invariant method on which to match. *)
 
-    let private traversal meth path query =
-        let pathAndQuery =
-            match query with
-            | "" -> path
-            | query -> sprintf "%s?%s" path query
-
+    let private traversal meth pathAndQuery =
         Traversal (
             Invariant meth,
             State (
@@ -244,7 +266,7 @@ module internal Evaluation =
         declared in the compilation phase. *)
 
     let private search graph =
-            traversal <!> !. Request.method_ <*> !. Request.path_ <*> !. (Request.query_ >-> Query.raw_)
+            traversal <!> !. Request.method_ <*> Request.pathAndQuery
         >>= traverse graph
         >>= select
 

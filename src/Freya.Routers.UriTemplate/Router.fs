@@ -21,7 +21,6 @@ type UriTemplateRoutes =
 
  and UriTemplateRoute =
     { Predicate: UriTemplateRoutePredicate
-      Specification: UriTemplateRouteSpecification
       Template: UriTemplate
       Pipeline: Pipeline }
 
@@ -32,10 +31,6 @@ type UriTemplateRoutes =
  and UriTemplateRouteMethod =
     | All
     | Methods of Method list
-
- and UriTemplateRouteSpecification =
-    | Path
-    | PathAndQuery
 
 (* Route
 

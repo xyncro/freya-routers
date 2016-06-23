@@ -65,10 +65,8 @@ module internal Compilation =
 
     let private (|Next|_|) =
         function | { Predicate = predicate
-                     Specification = spec
                      Template = UriTemplate (part :: parts)
                      Pipeline = pipe } -> Some (part, { Predicate = predicate
-                                                        Specification = spec
                                                         Template = UriTemplate (parts)
                                                         Pipeline = pipe })
                  | _ -> None

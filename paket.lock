@@ -15,6 +15,8 @@ NUGET
       Freya.Optics (>= 3.0.0-b301)
       Freya.Types.Http (>= 3.0.0-b < 3.1.0-b)
       Freya.Types.Uri (>= 3.0.0-b < 3.1.0-b)
+    Freya.Polyfills (3.0.0-b302)
+      Freya.Core (>= 3.0.0-b < 3.1.0-b)
     Freya.Types (3.0.0-b301)
       FParsec (>= 1.0 < 2.0)
     Freya.Types.Http (3.0.0-b301)
@@ -36,7 +38,7 @@ NUGET
 GROUP Build
 NUGET
   remote: http://www.nuget.org/api/v2
-    FAKE (4.28)
+    FAKE (4.29.2)
 GITHUB
   remote: xyncro/build
     build.fsx (589ed49e68b51d7de9e9de9be1adc30e26ce534d)

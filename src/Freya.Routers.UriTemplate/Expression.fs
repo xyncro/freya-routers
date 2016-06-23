@@ -37,7 +37,6 @@ type UriTemplateRouterBuilder with
     member inline __.Route (m, method, template, pipeline) : UriTemplateRouter =
         UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
             r @ [ { Predicate = Method (UriTemplateRouteMethod.infer method)
-                    Specification = Path
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
 
@@ -45,7 +44,6 @@ type UriTemplateRouterBuilder with
     member inline __.Resource (m, template, pipeline) : UriTemplateRouter =
         UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
             r @ [ { Predicate = Method (All)
-                    Specification = Path
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
 
