@@ -1,8 +1,8 @@
 ﻿type project
 id
-    Freya.Routers.UriTemplate
+    Freya.Routers.Uri.Template
 title
-    Freya.Routers.UriTemplate
+    Freya.Routers.Uri.Template
 description
     A Freya Router based on URI Templates for route matching
 tags

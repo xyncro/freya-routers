@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Freya.Routers.UriTemplate.Tests.Prelude
+module Freya.Routers.Uri.Template.Tests.Prelude
 
 open Aether
 open Freya.Core

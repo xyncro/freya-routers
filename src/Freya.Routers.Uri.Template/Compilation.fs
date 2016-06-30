@@ -1,4 +1,4 @@
-﻿namespace Freya.Routers.UriTemplate
+﻿namespace Freya.Routers.Uri.Template
 
 open Aether
 open Aether.Operators

@@ -1,10 +1,10 @@
 ﻿[<AutoOpen>]
-module Freya.Routers.UriTemplate.Tests.Matching
+module Freya.Routers.Uri.Template.Tests.Matching
 
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Optics.Http
-open Freya.Routers.UriTemplate
+open Freya.Routers.Uri.Template
 open Freya.Testing
 open Freya.Testing.Operators
 open Freya.Types.Http
