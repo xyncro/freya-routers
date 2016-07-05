@@ -36,14 +36,14 @@ type UriTemplateRouterBuilder with
     [<CustomOperation ("route", MaintainsVariableSpaceUsingBind = true)>]
     member inline __.Route (m, method, template, pipeline) : UriTemplateRouter =
         UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
-            r @ [ { Predicate = Method (UriTemplateRouteMethod.infer method)
+            r @ [ { Method = UriTemplateRouteMethod.infer method
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
 
     [<CustomOperation ("resource", MaintainsVariableSpaceUsingBind = true)>]
     member inline __.Resource (m, template, pipeline) : UriTemplateRouter =
         UriTemplateRouter.map (m, Optic.map (Lens.ofIsomorphism UriTemplateRoutes.routes_) (fun r ->
-            r @ [ { Predicate = Method (All)
+            r @ [ { Method = All
                     Template = UriTemplate.infer template
                     Pipeline = Pipeline.infer pipeline } ]))
 

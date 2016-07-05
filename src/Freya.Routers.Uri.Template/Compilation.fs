@@ -1,7 +1,7 @@
 ﻿namespace Freya.Routers.Uri.Template
 
-open Aether
-open Aether.Operators
+#nowarn "46"
+
 open FParsec
 open Freya.Core
 open Freya.Types.Uri.Template
@@ -9,51 +9,47 @@ open Hekate
 
 (* Types
 
-   Types representing the elements of a compiled routing graph, modelling each
-   aspect of the graph as a restrictive sum type. *)
+   Types representing the elements of a compiled routing trie, modelling each
+   aspect of the trie as a restrictive sum type. *)
 
-type internal Compilation =
-    | Compilation of Graph<Key, Node, Edge>
-
-    static member compilation_ =
-        (fun (Compilation g) -> g), (Compilation)
-
- and internal Key =
-    | Root
-    | Key of string
-
- and internal Node =
-    | Empty
-    | Endpoints of Endpoint list
+type internal Route =
+    | Route of Endpoint list * Remainder list
 
  and internal Endpoint =
-    | Endpoint of int * UriTemplateRoutePredicate * Pipeline
+    | Endpoint of int * UriTemplateRouteMethod * Pipeline
 
- and internal Edge =
-    | Edge of Parser<UriTemplateData, unit>
+ and internal Remainder =
+    | Remainder of Parser<UriTemplateData,unit> * Route
 
-(* Compilation
+(* Construction
 
    Functions dealing with the compilation of a list of UriTemplateRoutes to a
    compiled routing graph which may be evaluated as part of the routing
    functionality. *)
 
 [<AutoOpen>]
-[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
-module internal Compilation =
+module internal Construction =
+
+    (* Types *)
+
+    type Key =
+        | Root
+        | Key of string
+
+     and Node =
+        | Empty
+        | Endpoints of Endpoint list
+
+     and Edge =
+        | Edge of Parser<UriTemplateData, unit>
 
     (* Defaults
 
        Default values for common structures, in this case a default (empty)
        compilation graph for use as the basis in compilation. *)
 
-    let private defaultCompilation =
-        Compilation (Graph.create [ Root, Empty ] [])
-
-    (* Optics *)
-
-    let private compilation_ =
-        Lens.ofIsomorphism Compilation.compilation_
+    let private defaultConstruction =
+        Graph.create [ Root, Empty ] []
 
     (* Patterns
 
@@ -64,17 +60,17 @@ module internal Compilation =
        which has a non-empty list of Endpoint types). *)
 
     let private (|Next|_|) =
-        function | { Predicate = predicate
+        function | { Method = method
                      Template = UriTemplate (part :: parts)
-                     Pipeline = pipe } -> Some (part, { Predicate = predicate
+                     Pipeline = pipe } -> Some (part, { Method = method
                                                         Template = UriTemplate (parts)
                                                         Pipeline = pipe })
                  | _ -> None
 
     let private (|Last|_|) =
-        function | { Predicate = predicate
+        function | { Method = method
                      Template = UriTemplate ([ part ])
-                     Pipeline = pipe } -> Some (predicate, part, pipe)
+                     Pipeline = pipe } -> Some (method, part, pipe)
                  | _ -> None
 
     (* Modification
@@ -84,8 +80,8 @@ module internal Compilation =
        the route, taking the head of the URI Template giving the route each
        time until exhausted. *)
 
-    let private composeKeys k1 k2 =
-        match k1, k2 with
+    let private composeKeys key1 key2 =
+        match key1, key2 with
         | Key s1, Key s2 -> Key (s1 + s2)
         | _, Key s2 -> Key s2
         | Key s1, _ -> Key s1
@@ -94,53 +90,73 @@ module internal Compilation =
     let private addNode key =
         Graph.Nodes.add (key, Empty)
 
-    let private updateNode key precedence predicate pipe =
-        Graph.Nodes.map (fun key' node ->
+    let private updateNode key precedence m part =
+        Graph.Nodes.map (fun key' n ->
             match key = key' with
             | true ->
-                match node with
-                | Empty -> Endpoints [ Endpoint (precedence, predicate, pipe) ]
-                | Endpoints (endpoints) -> Endpoints (endpoints @ [ Endpoint (precedence, predicate, pipe) ])
+                match n with
+                | Empty -> Endpoints [ Endpoint (precedence, m, part) ]
+                | Endpoints (es) -> Endpoints (es @ [ Endpoint (precedence, m, part) ])
             | _ ->
-                node)
+                n)
 
     let private addEdge key1 key2 part graph =
         Graph.Edges.add (key1, key2,
             Edge (UriTemplatePart.Matching.Match part)) graph
 
-    let rec private addRoute current graph (precedence, route) =
+    let rec private addRoute key1 graph (precedence, route) =
         match route with
-        | Last (predicate, part, pipe) ->
-            let node =
-                composeKeys current (Key (string part))
+        | Last (method, part, pipe) ->
+            let key2 =
+                composeKeys key1 (Key (string part))
 
             let graph =
                 ((fun graph ->
-                    (match Graph.Nodes.contains node graph with
-                     | false -> addNode node >> updateNode node precedence predicate pipe >> addEdge current node part
-                     | _ -> updateNode node precedence predicate pipe) graph) ^% compilation_) graph
+                    (match Graph.Nodes.contains key2 graph with
+                     | false -> addNode key2 >> updateNode key2 precedence method pipe >> addEdge key1 key2 part
+                     | _ -> updateNode key2 precedence method pipe)) graph) graph
 
             graph
         | Next (part, route) ->
-            let node =
-                composeKeys current (Key (string part))
+            let key2 =
+                composeKeys key1 (Key (string part))
 
             let graph =
                 ((fun graph ->
-                    (match Graph.Nodes.contains node graph with
-                     | false -> addNode node >> addEdge current node part
-                     | _ -> id) graph) ^% compilation_) graph
+                    (match Graph.Nodes.contains key2 graph with
+                     | false -> addNode key2 >> addEdge key1 key2 part
+                     | _ -> id)) graph) graph
 
-            addRoute node graph (precedence, route)
+            addRoute key2 graph (precedence, route)
         | _ ->
             graph
 
-    (* Compilation
+    let construct =
+            List.mapi (fun precedence route -> precedence, route)
+         >> List.fold (addRoute Root) defaultConstruction
 
-       A function to compile a list of raw FreyaRoute instances to an instance
-       of a Compilation, which can be executed directly (and hopefully
-       efficiently). *)
+(* Deconstruction *)
+
+[<AutoOpen>]
+module internal Deconstruction =
+
+    let rec private route key graph =
+        match Graph.Nodes.tryFind key graph, Graph.Nodes.outward key graph with
+        | Some (_, Endpoints endpoints), Some nodes -> Route (endpoints, remainders graph nodes)
+        | Some (_), Some nodes -> Route ([], remainders graph nodes)
+        | _ -> Route ([],[])
+
+    and private remainders graph =
+        List.map (fun (_, key, Edge parser) -> Remainder (parser, route key graph))
+
+    let deconstruct =
+        route Root
+
+(* Compilation *)
+
+[<AutoOpen>]
+module internal Compilation =
 
     let compile =
-            List.mapi (fun precedence route -> precedence, route)
-         >> List.fold (addRoute Root) defaultCompilation
+            construct
+         >> deconstruct

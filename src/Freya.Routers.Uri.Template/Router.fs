@@ -20,13 +20,9 @@ type UriTemplateRoutes =
         (fun (UriTemplateRoutes x) -> x), (UriTemplateRoutes)
 
  and UriTemplateRoute =
-    { Predicate: UriTemplateRoutePredicate
+    { Method: UriTemplateRouteMethod
       Template: UriTemplate
       Pipeline: Pipeline }
-
- and UriTemplateRoutePredicate =
-    | Method of UriTemplateRouteMethod
-    | Custom of Freya<bool>
 
  and UriTemplateRouteMethod =
     | All
@@ -39,6 +35,7 @@ type UriTemplateRoutes =
    are simple core F# primitives. *)
 
 [<RequireQualifiedAccess>]
+[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module Route =
 
     let data_ =
