@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{C328A697-C525-4D90-BD45-FB9C681EEB5A}"
 EndProject
@@ -20,30 +20,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencie
 		paket.lock = paket.lock
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F5F89FCF-6655-4A19-8AB0-7E4823D91AC5}"
-	ProjectSection(SolutionItems) = preProject
-		src\Freya.Routers\Freya.Routers.fsproj.paket.references = src\Freya.Routers\Freya.Routers.fsproj.paket.references
-		src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj.paket.references = src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj.paket.references
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CD0251CD-035A-41CA-9723-36CE59F64E75}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4}"
-	ProjectSection(SolutionItems) = preProject
-		tests\Freya.Routers.Uri.Template.Tests\Freya.Routers.Uri.Template.Tests.fsproj.paket.references = tests\Freya.Routers.Uri.Template.Tests\Freya.Routers.Uri.Template.Tests.fsproj.paket.references
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{C03E0A0F-1E57-408D-9212-927013CBD65D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B1BD241-6129-4949-8656-2DA32312492F}"
-	ProjectSection(SolutionItems) = preProject
-		src\Freya.Routers\Freya.Routers.fsproj.paket.template = src\Freya.Routers\Freya.Routers.fsproj.paket.template
-		src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj.paket.template = src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj.paket.template
-	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template", "src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj", "{4DF4D77A-52FB-4256-9D75-228D4C3C86B6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template.Tests", "tests\Freya.Routers.Uri.Template.Tests\Freya.Routers.Uri.Template.Tests.fsproj", "{E3735DA6-738B-40ED-82F9-EBFF8F9D8B90}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "variants", "variants", "{EFFC4069-E487-4810-AB63-72DF11470869}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "async", "async", "{6C8943C0-FD0B-4674-A65D-B34EB66FBD92}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hopac", "hopac", "{D42AF3FA-F6C4-4D23-B45C-85A5CD6D4701}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{9AB7BF0C-8CAD-462D-BF80-5C6414291165}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EE7DFFE3-625F-46C9-9CD2-4164FE190733}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{129CC272-109E-4A64-A47B-A225AE399470}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template.Hopac", "src\Freya.Routers.Uri.Template.Hopac\Freya.Routers.Uri.Template.Hopac.fsproj", "{5634A49D-3874-433E-8E3C-C4687F0A6B3A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{67A18997-CB3D-4AE6-8E90-DAE23045C971}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template.Hopac.Tests", "tests\Freya.Routers.Uri.Template.Hopac.Tests\Freya.Routers.Uri.Template.Hopac.Tests.fsproj", "{62F878F2-1634-4D36-86D8-44BA383E67DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,19 +62,33 @@ Global
 		{E3735DA6-738B-40ED-82F9-EBFF8F9D8B90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3735DA6-738B-40ED-82F9-EBFF8F9D8B90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3735DA6-738B-40ED-82F9-EBFF8F9D8B90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5634A49D-3874-433E-8E3C-C4687F0A6B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5634A49D-3874-433E-8E3C-C4687F0A6B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5634A49D-3874-433E-8E3C-C4687F0A6B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5634A49D-3874-433E-8E3C-C4687F0A6B3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5} = {A89B47E3-9099-4043-8BBF-109C6A4B74B0}
+		{A89B47E3-9099-4043-8BBF-109C6A4B74B0} = {6C8943C0-FD0B-4674-A65D-B34EB66FBD92}
+		{947E950B-DC5E-488E-AF69-5DEB6FB41EC5} = {EE7DFFE3-625F-46C9-9CD2-4164FE190733}
 		{51C80278-0EA4-492B-BA43-F60AAC69B242} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
 		{4B6785A1-9591-4A0B-B0E8-8B59E45D27D6} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
-		{F5F89FCF-6655-4A19-8AB0-7E4823D91AC5} = {4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}
-		{9AD57B12-6DF6-4519-AF39-0ECC8BFEDCF4} = {4B6785A1-9591-4A0B-B0E8-8B59E45D27D6}
-		{C03E0A0F-1E57-408D-9212-927013CBD65D} = {C328A697-C525-4D90-BD45-FB9C681EEB5A}
-		{8B1BD241-6129-4949-8656-2DA32312492F} = {C03E0A0F-1E57-408D-9212-927013CBD65D}
+		{CD0251CD-035A-41CA-9723-36CE59F64E75} = {6C8943C0-FD0B-4674-A65D-B34EB66FBD92}
 		{4DF4D77A-52FB-4256-9D75-228D4C3C86B6} = {A89B47E3-9099-4043-8BBF-109C6A4B74B0}
 		{E3735DA6-738B-40ED-82F9-EBFF8F9D8B90} = {CD0251CD-035A-41CA-9723-36CE59F64E75}
+		{6C8943C0-FD0B-4674-A65D-B34EB66FBD92} = {EFFC4069-E487-4810-AB63-72DF11470869}
+		{D42AF3FA-F6C4-4D23-B45C-85A5CD6D4701} = {EFFC4069-E487-4810-AB63-72DF11470869}
+		{9AB7BF0C-8CAD-462D-BF80-5C6414291165} = {EFFC4069-E487-4810-AB63-72DF11470869}
+		{EE7DFFE3-625F-46C9-9CD2-4164FE190733} = {9AB7BF0C-8CAD-462D-BF80-5C6414291165}
+		{129CC272-109E-4A64-A47B-A225AE399470} = {D42AF3FA-F6C4-4D23-B45C-85A5CD6D4701}
+		{5634A49D-3874-433E-8E3C-C4687F0A6B3A} = {129CC272-109E-4A64-A47B-A225AE399470}
+		{67A18997-CB3D-4AE6-8E90-DAE23045C971} = {D42AF3FA-F6C4-4D23-B45C-85A5CD6D4701}
+		{62F878F2-1634-4D36-86D8-44BA383E67DD} = {67A18997-CB3D-4AE6-8E90-DAE23045C971}
 	EndGlobalSection
 EndGlobal

@@ -1,14 +1,14 @@
 ﻿type project
 id
-    Freya.Routers
+    Freya.Routers.Uri.Template
 title
-    Freya.Routers
+    Freya.Routers.Uri.Template
 description
-    The core utilities for Freya Routers
+    A Freya Router based on URI Templates for route matching
 tags
-    functional, web, f#, http, router, freya
+    functional, web, f#, http, router, uri, template, freya
 version
-    3.0.0-b303
+    3.0.0-rc01
 owners
     Andrew Cherry, Ryan Riley
 authors

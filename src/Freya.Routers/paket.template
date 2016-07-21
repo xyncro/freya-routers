@@ -1,0 +1,23 @@
+﻿type project
+id
+    Freya.Routers
+title
+    Freya.Routers
+description
+    The core utilities for Freya Routers
+tags
+    functional, web, f#, http, router, freya
+version
+    3.0.0-rc01
+owners
+    Andrew Cherry, Ryan Riley
+authors
+    Andrew Cherry, Ryan Riley
+copyright
+    Copyright Xyncro Ltd 2016
+projectUrl
+    https://xyncro.tech/freya
+licenseUrl
+    https://github.com/xyncro/freya-routers/blob/master/LICENSE.md
+requireLicenseAcceptance
+    false

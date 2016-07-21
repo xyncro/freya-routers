@@ -1,0 +1,13 @@
+﻿group Common
+
+  Aether
+  Freya.Types.Http
+  Freya.Types.Uri
+  Freya.Types.Uri.Template
+  Hekate
+
+group Hopac
+
+  Freya.Core.Hopac
+  Freya.Optics.Http.Hopac
+  Freya.Polyfills.Hopac
