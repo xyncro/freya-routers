@@ -5,7 +5,6 @@ open Aether.Operators
 open Freya.Core
 open Freya.Types.Http
 open Freya.Types.Uri.Template
-open Freya.Routers
 
 (* Types
 
@@ -39,13 +38,12 @@ type UriTemplateRoutes =
 module Route =
 
     let data_ =
-            State.value_ "freya.routers.uritemplate.data"
-        >-> Option.unsafe_
+            State.value_<UriTemplateData> "freya.routers.uri.template.data"
 
     let value_ key =
-            data_ 
-        >-> UriTemplateData.uriTemplateData_
-        >-> Map.key_ (Key key)
+            State.key_<UriTemplateData> "freya.routers.uri.template.data"
+        >?> UriTemplateData.uriTemplateData_
+        >?> Map.key_ (Key key)
 
     let atom_ key =
             value_ key

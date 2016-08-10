@@ -54,9 +54,9 @@ module UriTemplateRouter =
         let (_, UriTemplateRoutes routes) = router (UriTemplateRoutes [])
         let compilation = compile routes
 
-        evaluate compilation >>= (
-            function | Some (data, pipeline) -> (Route.data_ .= data) *> pipeline
-                     | _ -> Pipeline.next)
+        evaluate compilation >>=
+            function | Some (data, pipeline) -> (Route.data_ .= Some data) *> pipeline
+                     | _ -> Pipeline.next
 
 (* Extensions
 

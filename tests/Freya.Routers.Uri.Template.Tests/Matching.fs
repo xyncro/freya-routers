@@ -90,3 +90,18 @@ let ``Router Executes First Full Match`` () =
         Route.atom_ "one" => None
         Route.atom_ "two" => Some "some"
         defaultValue => Some "two" ]
+
+[<Fact>]
+let ``Router Matches Optional Path Segment`` () =
+
+    let router =
+        freyaRouter {
+            route All "/test{/test}" (defaultValue .= Some "one") }
+
+    verify (Request.path_ .= "/test") router [
+        Route.atom_ "test" => None
+        defaultValue => Some "one" ]
+
+//    verify (Request.path_ .= "/test/test") router [
+//        Route.atom_ "test" => Some "test"
+//        defaultValue => Some "one" ]

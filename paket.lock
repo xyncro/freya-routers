@@ -6,7 +6,7 @@ NUGET
     Aether (8.1.2)
     FParsec (1.0.2)
   remote: http://www.myget.org/F/freya/api/v2
-    Freya.Core (3.0.0-rc01)
+    Freya.Core (3.0.0-rc02)
       Aether (>= 8.1 < 9.0)
     Freya.Optics (3.0.0-rc01)
       Aether (>= 8.1 < 9.0)
@@ -36,7 +36,7 @@ GROUP Build
 FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
-    FAKE (4.34.5)
+    FAKE (4.37.2)
 GITHUB
   remote: xyncro/build
     build.fsx (589ed49e68b51d7de9e9de9be1adc30e26ce534d)
@@ -72,10 +72,10 @@ NUGET
     Aether (8.1.2)
     FParsec (1.0.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.2.1)
+    Hopac (0.3.7)
       FSharp.Core (>= 3.1.2.5)
   remote: http://www.myget.org/F/freya/api/v2
-    Freya.Core.Hopac (3.0.0-rc01)
+    Freya.Core.Hopac (3.0.0-rc02)
       Aether (>= 8.1 < 9.0)
       Hopac (>= 0.0 < 1.0)
     Freya.Optics (3.0.0-rc01)
@@ -108,9 +108,9 @@ NUGET
   remote: http://www.nuget.org/api/v2
     Aether (8.1.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.2.1)
+    Hopac (0.3.7)
       FSharp.Core (>= 3.1.2.5)
-    Unquote (3.1.1)
+    Unquote (3.1.2)
     xunit (2.1)
       xunit.assert (2.1)
       xunit.core (2.1)
@@ -125,9 +125,9 @@ NUGET
       xunit.extensibility.core (2.1)
     xunit.runner.console (2.1)
   remote: http://www.myget.org/F/freya/api/v2
-    Freya.Core (3.0.0-rc01)
+    Freya.Core (3.0.0-rc02)
       Aether (>= 8.1 < 9.0)
-    Freya.Core.Hopac (3.0.0-rc01)
+    Freya.Core.Hopac (3.0.0-rc02)
       Aether (>= 8.1 < 9.0)
       Hopac (>= 0.0 < 1.0)
     Freya.Testing (3.0.0-rc01)
