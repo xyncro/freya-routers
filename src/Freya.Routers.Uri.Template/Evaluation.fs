@@ -86,19 +86,25 @@ module internal Evaluation =
        highest precedence is selected and returned (if a matching endpoint is
        found). *)
 
-    let rec private traverse =
-        function | Traversal (method, "", data) -> complete method data
-                 | Traversal (method, pathAndQuery, data) -> progress method data pathAndQuery
+    let rec private traverse route traversal =
+        List.concat [
+            inclusion route traversal
+            progression route traversal ]
 
-    (* Completion
+    (* Inclusion
 
-       Completion consists of the case where the path and query have been
-       exhausted and candidate endpoints must be returned. The endpoints are
-       filtered using an active pattern based on method match and returned
-       along with the associated data state and the precedence. *)
+       Inclusion consists of the case where the path and query have been
+       exhausted and candidate endpoints may be included in the set of possible
+       endpoints. The endpoints are filtered using an active pattern based on
+       method match and returned along with the associated data state and the
+       precedence. *)
 
-    and private complete m d =
-        function | Route (Endpoints m es, _) -> List.map (fun (Endpoint (i, _, p)) -> i, d, p) es
+    and private inclusion route =
+        function | Traversal (method, "", data) -> include method data route
+                 | _ -> []
+
+    and private include method data =
+        function | Route (Endpoints method endpoints, _) -> List.map (fun (Endpoint (precedence, _, pipe)) -> precedence, data, pipe) endpoints
                  | _ -> []
 
     and private (|Endpoints|_|) method =
@@ -123,6 +129,9 @@ module internal Evaluation =
        The remainder matching and parser matching per remainder is defined as a
        simple set of filtering active patterns. *)
 
+    and private progression route =
+        function | Traversal (method, pathAndQuery, data) -> progress method data pathAndQuery route
+
     and private progress method data pathAndQuery =
         function | Route (_, Remainders remainders) -> (List.map (remainder method data pathAndQuery) >> List.concat) remainders
                  | _ -> []
@@ -132,7 +141,7 @@ module internal Evaluation =
                  | remainders -> Some remainders
 
     and private remainder method data pathAndQuery =
-        function | Remainder (Match pathAndQuery (data', pathAndQuery), route) -> traverse (Traversal (method, pathAndQuery, data + data')) route
+        function | Remainder (Match pathAndQuery (data', pathAndQuery), route) -> traverse route (Traversal (method, pathAndQuery, data + data'))
                  | _ -> []
 
     and private (|Match|_|) pathAndQuery =
@@ -144,8 +153,8 @@ module internal Evaluation =
 
     (* Selection
 
-        Select the highest precedence data and pipeline pair from the given set
-        of candidates, using the supplied precedence value. *)
+       Select the highest precedence data and pipeline pair from the given set
+       of candidates, using the supplied precedence value. *)
 
     let rec private select =
         function | [] -> Unmatched
@@ -159,14 +168,14 @@ module internal Evaluation =
 
     (* Search
 
-        Combine a list of all possible route matches and associated captured
-        data, produced by a traversal of the compiled routing graph, with a
-        selection of the matched route (data and pipeline pair) with the
-        highest precedence, as measured by the order in which the routes were
-        declared in the compilation phase. *)
+       Combine a list of all possible route matches and associated captured
+       data, produced by a traversal of the compiled routing graph, with a
+       selection of the matched route (data and pipeline pair) with the
+       highest precedence, as measured by the order in which the routes were
+       declared in the compilation phase. *)
 
-    let rec private search part =
-            flip traverse part >> select
+    let rec private search route =
+            traverse route >> select
         <!> initial
 
     and private initial =
@@ -177,12 +186,12 @@ module internal Evaluation =
 
     (* Evaluation
 
-        Run a search on the routing graph. In the case of a match, write any
-        captured data to the state to be interrogated later through the routing
-        lenses, and return the value of executing the matched pipeline.
+       Run a search on the routing graph. In the case of a match, write any
+       captured data to the state to be interrogated later through the routing
+       lenses, and return the value of executing the matched pipeline.
 
-        In the case of a non-match, fall through to whatever follows the router
-        instance. *)
+       In the case of a non-match, fall through to whatever follows the router
+       instance. *)
 
     let evaluate route =
             function | Matched (data, pipe) -> Some (data, pipe)

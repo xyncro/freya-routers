@@ -102,6 +102,6 @@ let ``Router Matches Optional Path Segment`` () =
         Route.atom_ "test" => None
         defaultValue => Some "one" ]
 
-//    verify (Request.path_ .= "/test/test") router [
-//        Route.atom_ "test" => Some "test"
-//        defaultValue => Some "one" ]
+    verify (Request.path_ .= "/test/test") router [
+        Route.atom_ "test" => Some "test"
+        defaultValue => Some "one" ]
