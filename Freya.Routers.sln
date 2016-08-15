@@ -44,6 +44,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{67A18997
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template.Hopac.Tests", "tests\Freya.Routers.Uri.Template.Hopac.Tests\Freya.Routers.Uri.Template.Hopac.Tests.fsproj", "{62F878F2-1634-4D36-86D8-44BA383E67DD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{5298469D-F9FE-4ED7-85AD-7ED199B0A94B}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freya.Routers.Uri.Template.Benchmarks", "benchmarks\Freya.Routers.Uri.Template.Benchmarks\Freya.Routers.Uri.Template.Benchmarks.fsproj", "{B30F4724-8AEE-427C-834A-D2C4E9BB8F69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +74,10 @@ Global
 		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F878F2-1634-4D36-86D8-44BA383E67DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B30F4724-8AEE-427C-834A-D2C4E9BB8F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B30F4724-8AEE-427C-834A-D2C4E9BB8F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B30F4724-8AEE-427C-834A-D2C4E9BB8F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B30F4724-8AEE-427C-834A-D2C4E9BB8F69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +98,7 @@ Global
 		{5634A49D-3874-433E-8E3C-C4687F0A6B3A} = {129CC272-109E-4A64-A47B-A225AE399470}
 		{67A18997-CB3D-4AE6-8E90-DAE23045C971} = {D42AF3FA-F6C4-4D23-B45C-85A5CD6D4701}
 		{62F878F2-1634-4D36-86D8-44BA383E67DD} = {67A18997-CB3D-4AE6-8E90-DAE23045C971}
+		{5298469D-F9FE-4ED7-85AD-7ED199B0A94B} = {6C8943C0-FD0B-4674-A65D-B34EB66FBD92}
+		{B30F4724-8AEE-427C-834A-D2C4E9BB8F69} = {5298469D-F9FE-4ED7-85AD-7ED199B0A94B}
 	EndGlobalSection
 EndGlobal

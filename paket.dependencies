@@ -39,6 +39,16 @@ group Build
   nuget Fake
   github xyncro/build build.fsx
 
+// Benchmark
+
+group Benchmark
+
+  framework: >= net45
+  source http://nuget.org/api/v2
+  source http://www.myget.org/F/freya/api/v2
+
+  nuget BenchmarkDotNet ~> 0
+
 // Test
 
 group Test

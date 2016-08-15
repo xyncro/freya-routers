@@ -1,0 +1,18 @@
+﻿group Common
+
+  Aether
+  Freya.Types.Http
+  Freya.Types.Uri.Template
+
+group Async
+
+  Freya.Core
+  Freya.Optics.Http
+
+group Benchmark
+
+  BenchmarkDotNet
+
+group Test
+
+  Freya.Testing
