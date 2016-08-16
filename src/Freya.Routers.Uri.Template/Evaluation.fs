@@ -130,25 +130,25 @@ module internal Evaluation =
        simple set of filtering active patterns. *)
 
     and private progression route =
-        function | Traversal (method, pathAndQuery, data) -> progress method data pathAndQuery route
+        function | Traversal (method, uri, data) -> progress method uri data route
 
-    and private progress method data pathAndQuery =
-        function | Route (_, Remainders remainders) -> (List.map (remainder method data pathAndQuery) >> List.concat) remainders
+    and private progress method uri data =
+        function | Route (_, Remainders remainders) -> (List.map (remainder method uri data) >> List.concat) remainders
                  | _ -> []
 
     and private (|Remainders|_|) =
         function | [] -> None
                  | remainders -> Some remainders
 
-    and private remainder method data pathAndQuery =
-        function | Remainder (Match pathAndQuery (data', pathAndQuery), route) -> traverse route (Traversal (method, pathAndQuery, data + data'))
+    and private remainder method uri data  =
+        function | Remainder (Match uri (uri', data'), route) -> traverse route (Traversal (method, uri', data + data'))
                  | _ -> []
 
-    and private (|Match|_|) pathAndQuery =
-        function | parser -> mapResult pathAndQuery (run parser pathAndQuery)
+    and private (|Match|_|) uri =
+        function | parser -> result uri (run parser uri)
 
-    and private mapResult pathAndQuery =
-        function | Success (data, _, position) -> Some (data, pathAndQuery.Substring (int position.Index))
+    and private result uri =
+        function | Success (data, _, position) -> Some (uri.Substring (int position.Index), data)
                  | _ -> None
 
     (* Selection
