@@ -43,11 +43,15 @@ group Build
 
 group Benchmark
 
+  content: none
   framework: >= net45
   source http://nuget.org/api/v2
   source http://www.myget.org/F/freya/api/v2
 
-  nuget BenchmarkDotNet ~> 0
+  nuget System.Reflection.Metadata
+  nuget BenchmarkDotNet                     ~> 0
+  nuget BenchmarkDotNet.Diagnostics.Windows ~> 0
+
 
 // Test
 

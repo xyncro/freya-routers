@@ -11,7 +11,9 @@ group Async
 
 group Benchmark
 
+  System.Reflection.Metadata
   BenchmarkDotNet
+  BenchmarkDotNet.Diagnostics.Windows
 
 group Test
 
