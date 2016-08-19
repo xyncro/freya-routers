@@ -21,6 +21,131 @@ type internal Route =
  and internal Remainder =
     | Remainder of Parser<UriTemplateData,unit> * Route
 
+
+module TempLiterals =
+
+    open Aether
+
+    (* Literals *)
+
+    let [<Literal>] private E =
+        ""
+
+    (* Types *)
+
+    type Trie =
+        | Trie of Map<string,(Endpoints * Trie)> * int
+        | Empty
+
+     and Endpoints =
+        | Endpoints of int list
+
+    (* Inclusion
+
+       Functions for ensuring the inclusion of a string and endpoint pair within a
+       Trie, either by adding to an existing Trie, or creating a Trie if the trie
+       is currently Empty. *)
+
+    let rec include =
+        function | Trie (map, size) -> update map size
+                 | Empty -> create
+
+    (* Update
+
+       Functions for creating a trie with a string and endpoint pair, given a map
+       and size. If the string is empty, a Trie will be created with the unmodified
+       map and size
+
+       When the string is shorter than the current size, the map will be resized to
+       reduce the key length to the length of the string, shifting the contents down
+       one level within the trie structure, before the endpoint is added to the map
+       resulting.
+
+       When the string is longer than the current size, the remainder of the string
+       will be added to the trie at the key given by the first part of the string if
+       one exists, or to an Empty trie at that location if not, up to the current
+       size.
+
+       When the string matches the current size, the endpoint will be added 
+       directly. *)
+
+    and update m l =
+        function | E, _ -> Trie (m, l)
+                 | Split l (p: string, _), e when p.Length < l -> Trie (Optic.map (Map.value_ p) (add e) (resize p.Length m), p.Length)
+                 | Split l (p, r: string), e when r.Length > 0 -> Trie (Optic.map (Map.value_ p) (continue e r) m, l)
+                 | Split l (p, _), e -> Trie (Optic.map (Map.value_ p) (add e) m, l)
+
+    and add e =
+        function | Some (Endpoints es, t) -> Some (Endpoints (e :: es), t)
+                 | _ -> Some (Endpoints [ e ], Empty)
+
+    and continue e r =
+        function | Some (es, t) -> Some (es, include t (r, e))
+                 | _ -> Some (Endpoints [], include Empty (r, e))
+
+    and resize l =
+        function | map -> Map.fold (fun m (Split l (p, r)) v -> Optic.map (Map.value_ p) (shift r v) m) Map.empty map
+
+    and shift k v =
+        function | Some (es, Trie (map, s)) -> Some (es, Trie (Map.add k v map, s))
+                 | _ -> Some (Endpoints [], Trie (Map.ofList [ k, v ], k.Length))
+
+    (* Create
+
+       Functions for creating a trie from a string and endpoint pair. If the string
+       is empty, the trie will be Empty. If the string is a valid string, a new
+       Trie will be created with the endpoint provided. *)
+
+    and create =
+        function | E, _ -> Empty
+                 | s, e -> Trie (Map.ofList [ s, (Endpoints [ e ], Empty) ], s.Length)
+
+    (* Strings *)
+
+    and (|Split|) l =
+        function | s -> prefix l s, remainder l s
+
+    and prefix l =
+        function | s when s.Length < l -> s
+                 | s -> s.Substring (0, l)
+
+    and remainder l =
+        function | s when s.Length < l -> E
+                 | s -> s.Substring (l)
+
+
+module TempMech =
+
+    type Route =
+        | Route of Endpoint list * Target list
+
+        static member empty =
+            Route ([], [])
+
+     and Endpoint =
+        | Endpoint of int * UriTemplateRouteMethod * Pipeline
+
+     and Target =
+        | Template of Template
+        | Literal of Literal
+
+     and Template =
+        | Template of Expression * Route // TODO
+
+     and Literal =
+        | Literal of Map<string,Route> * int
+        | Empty
+
+
+    let rec compile (routes: (int * UriTemplateRoute) list) =
+        List.fold add Route.empty routes
+
+    and add s =
+        function | i, { Template = UriTemplate (parts)
+                        Method = method
+                        Pipeline = pipeline } -> s
+
+
 (* Construction
 
    Functions dealing with the compilation of a list of UriTemplateRoutes to a
@@ -41,7 +166,7 @@ module internal Construction =
         | Endpoints of Endpoint list
 
      and Edge =
-        | Edge of Parser<UriTemplateData, unit>
+        | Edge of UriTemplatePart
 
     (* Defaults
 
@@ -101,8 +226,7 @@ module internal Construction =
                 n)
 
     let private addEdge key1 key2 part graph =
-        Graph.Edges.add (key1, key2,
-            Edge (UriTemplatePart.Matching.Match part)) graph
+        Graph.Edges.add (key1, key2, Edge part) graph
 
     let rec private addRoute key1 graph (precedence, route) =
         match route with
@@ -147,7 +271,7 @@ module internal Deconstruction =
         | _ -> Route ([],[])
 
     and private remainders graph =
-        List.map (fun (_, key, Edge parser) -> Remainder (parser, route key graph))
+        List.map (fun (_, key, Edge part) -> Remainder (UriTemplatePart.Matching.Match part, route key graph))
 
     let deconstruct =
         route Root
