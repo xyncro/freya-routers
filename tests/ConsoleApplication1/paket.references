@@ -1,0 +1,13 @@
+﻿group Common
+
+  Aether
+  Anat
+  Freya.Types.Http
+  Freya.Types.Uri
+  Freya.Types.Uri.Template
+
+group Async
+
+  Freya.Core
+  Freya.Optics.Http
+  Freya.Polyfills

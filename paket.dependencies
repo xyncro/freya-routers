@@ -6,6 +6,7 @@ group Common
   source http://www.myget.org/F/freya/api/v2
 
   nuget Aether                   ~> 8.1
+  nuget Anat                     ~> 1
   nuget Freya.Types.Http         ~> 3.0.0-rc
   nuget Freya.Types.Uri          ~> 3.0.0-rc
   nuget Freya.Types.Uri.Template ~> 3.0.0-rc
