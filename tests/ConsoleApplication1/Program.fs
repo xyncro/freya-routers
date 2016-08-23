@@ -6,6 +6,7 @@ open Anat
 open Anat.Operators
 open Freya.Core
 open Freya.Types.Http
+open Freya.Types.Uri
 open Freya.Types.Uri.Template
 
 [<AutoOpen>]
@@ -145,35 +146,32 @@ type Route =
     | Endpoint of int * UriTemplateRouteMethod * Pipeline
 
  and Target =
-    | Template of Template
-    | Literal of Literal
+    | Expression of Expression
+    | Strings of Strings
 
-    static member template_ =
-        (function | Template t -> Some t | _ -> None), (Template)
+    static member expression_ =
+        (function | Expression t -> Some t | _ -> None), (Expression)
 
-    static member literal_ =
-        (function | Literal l -> Some l | _ -> None), (Literal)
+    static member strings_ =
+        (function | Strings l -> Some l | _ -> None), (Strings)
 
-    static member template =
-        Template.Template >> Template
+    static member expression =
+        Expression.Expression >> Expression
 
-    static member literal =
-        Literal.Literal >> Literal
+    static member strings =
+        Strings.Strings >> Strings
 
- and Template =
-    | Template of Expression * Route
+ and Expression =
+    | Expression of Template.Expression * Route
 
- and Literal =
-    | Literal of Map<string,Route> * int
-    | Empty
+ and Strings =
+    | Strings of Map<string,Route> * int
 
-    static member routes_ =
-        (function | Literal (m, _) -> Some m | _ -> None),
-        (fun m -> function | Literal (_, s) -> Literal (m, s) | _ -> Empty)
+    static member map_ =
+        (fun (Strings (m, _)) -> m), (fun m (Strings (_, s)) -> Strings (m, s))
 
     static member size_ =
-        (function | Literal (_, s) -> Some s | _ -> None),
-        (fun s -> function | Literal (m, _) -> Literal (m, s) | _ -> Empty)
+        (fun (Strings (_, s)) -> s), (fun s (Strings (m, _)) -> Strings (m, s))
 
 (* Optics
 
@@ -223,18 +221,18 @@ module Endpoints =
     and private create (i, { Method = m; Pipeline = p }) =
             Endpoint (i, m, p)
 
-(* Templates
+(* Expressions
 
    Functions to take a list of int and UriTemplateRoute pairs (which have been
-   pre-selected to be Template (expression) based for the first part of the
-   defining UriTemplate path) and produce a list of Targets, recurively using
-   the route function to construct appropriate sub-routes.
+   pre-selected to be expression based for the first part of the defining
+   UriTemplate path) and produce a list of Targets, recurively using the route
+   function to construct appropriate sub-routes.
 
    The routes are first grouped by the head expression value to simplify
    construction. *)
 
 [<RequireQualifiedAccess>]
-module Templates =
+module Expressions =
 
     let rec add route =
             group
@@ -250,40 +248,59 @@ module Templates =
             List.map (Optic.map parts_ List.tail)
 
     and private create route (e, rs) =
-            Target.template (e, route Route.empty (routes rs))
+            Target.expression (e, route Route.empty (routes rs))
 
 (* Literals *)
 
 [<RequireQualifiedAccess>]
-module Literals =
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Strings =
+
+    let private literal_ =
+            literal_
+        >?> Literal.literal_
 
     let rec add route =
             sort
         >>> fold route
-        >>> test
 
     and private sort =
-            List.sortBy (Optic.get (literal_ >?> Literal.literal_) >> Option.get >> fun s -> s.Length)
+            List.sortBy (Optic.get literal_ >> Option.get >> fun s -> s.Length)
 
     and private fold route =
-            List.fold (upsert route) Route.empty
+            List.fold (upsert route) []
 
-    and private upsert route s r =
-            Optic.map Route.targets_ (fun ts ->
-                (function | Some i -> update route i ts
-                          | _ -> insert route ts) (tryFindIndex ts)) s
+    and private upsert route ts r =
+            (function | Some i -> update route i r ts
+                      | _ -> insert route ts r) (tryFindIndex ts)
 
-    and private update route i ts =
+    and private tryFindIndex =
+            List.tryFindIndex (Optic.get (Prism.ofEpimorphism Target.strings_) >> Option.isSome)
+
+    and private update route i r ts =
+            printfn "updating route"
             ts
 
     and private insert route ts =
-            ts
+            key &&& value
+        >>> target route
+        >>> singleton
+        >>> append ts
 
-    and private tryFindIndex =
-            List.tryFindIndex (Optic.get (Prism.ofEpimorphism Target.literal_) >> Option.isSome)
+    and private target route (k, v) =
+            Target.strings (Map.ofList [ k, route Route.empty [ v ] ], k.Length)
 
-    and private test r =
-            []
+    and private key =
+            Optic.get literal_ >> Option.get
+
+    and private value =
+            Optic.map parts_ List.tail
+
+    and private singleton =
+            List.singleton
+
+    and private append =
+            List.append
 
 (* Targets *)
 
@@ -292,7 +309,7 @@ module Targets =
 
     let rec add route ts =
             partition
-        >>> Templates.add route *** Literals.add route
+        >>> Expressions.add route *** Strings.add route
         >>> join
         >>> append ts
 
