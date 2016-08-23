@@ -132,8 +132,14 @@ module TempLiterals =
 type Route =
     | Route of Endpoint list * Target list
 
+    static member endpoints_ =
+        (fun (Route (es, _)) -> es), (fun es (Route (_, ts)) -> Route (es, ts))
+
+    static member targets_ =
+        (fun (Route (_, ts)) -> ts), (fun ts (Route (es, _)) -> Route (es, ts))
+
     static member empty =
-        Route ([], [])
+            Route ([], [])
 
  and Endpoint =
     | Endpoint of int * UriTemplateRouteMethod * Pipeline
@@ -142,12 +148,32 @@ type Route =
     | Template of Template
     | Literal of Literal
 
+    static member template_ =
+        (function | Template t -> Some t | _ -> None), (Template)
+
+    static member literal_ =
+        (function | Literal l -> Some l | _ -> None), (Literal)
+
+    static member template =
+        Template.Template >> Template
+
+    static member literal =
+        Literal.Literal >> Literal
+
  and Template =
     | Template of Expression * Route
 
  and Literal =
     | Literal of Map<string,Route> * int
     | Empty
+
+    static member routes_ =
+        (function | Literal (m, _) -> Some m | _ -> None),
+        (fun m -> function | Literal (_, s) -> Literal (m, s) | _ -> Empty)
+
+    static member size_ =
+        (function | Literal (_, s) -> Some s | _ -> None),
+        (fun s -> function | Literal (m, _) -> Literal (m, s) | _ -> Empty)
 
 (* Optics
 
@@ -156,18 +182,23 @@ type Route =
    interrogation and manipulation of state in the functions used to build and
    work with the Route instance. *)
 
-let private uriTemplate_ =
+let private template_ =
         snd_
     >-> UriTemplateRoute.template_
 
-let private uriTemplateParts_ =
-        uriTemplate_
+let private parts_ =
+        template_
     >-> UriTemplate.uriTemplate_
 
-let private uriTemplateExpression_ =
-        uriTemplateParts_
+let private expression_ =
+        parts_
     >-> List.head_
     >?> UriTemplatePart.expression_
+
+let private literal_ =
+        parts_
+    >-> List.head_
+    >?> UriTemplatePart.literal_
 
 (* Endpoints
 
@@ -176,18 +207,21 @@ let private uriTemplateExpression_ =
    i.e. the UriTemplate defining the remaining route is empty) and return a
    list of endpoints with the appropriate endpoints added. *)
 
-let rec private endpoints es =
-        endpointsMap ()
-    >>> endpointsAppend es
+[<RequireQualifiedAccess>]
+module Endpoints =
 
-and private endpointsMap _ =
-        List.map (endpoint)
+    let rec add es =
+            map ()
+        >>> append es
 
-and private endpoint (i, { Method = m; Pipeline = p }) =
-        Endpoint (i, m, p)
+    and private map _ =
+            List.map (create)
 
-and private endpointsAppend =
-        List.append
+    and private append =
+            List.append
+
+    and private create (i, { Method = m; Pipeline = p }) =
+            Endpoint (i, m, p)
 
 (* Templates
 
@@ -199,72 +233,99 @@ and private endpointsAppend =
    The routes are first grouped by the head expression value to simplify
    construction. *)
 
-let rec templates route =
-        templatesGroup
-    >>> templatesMap route
+[<RequireQualifiedAccess>]
+module Templates =
 
-and private templatesGroup =
-        List.groupBy (Optic.get uriTemplateExpression_ >> Option.get)
+    let rec add route =
+            group
+        >>> map route
 
-and private templatesMap route =
-        List.map (templatesTarget route)
+    and private group =
+            List.groupBy (Optic.get expression_ >> Option.get)
 
-and private templatesTarget route (e, rs) =
-        Target.Template (Template (e, route Route.empty (templatesRoutes rs)))
+    and private map route =
+            List.map (create route)
 
-and private templatesRoutes =
-        List.map (Optic.map uriTemplateParts_ List.tail)
+    and private routes =
+            List.map (Optic.map parts_ List.tail)
+
+    and private create route (e, rs) =
+            Target.template (e, route Route.empty (routes rs))
 
 (* Literals *)
 
-let private literals _ =
-        id
+[<RequireQualifiedAccess>]
+module Literals =
+
+    let rec add route =
+            sort
+        >>> fold route
+        >>> test
+
+    and private sort =
+            List.sortBy (Optic.get (literal_ >?> Literal.literal_) >> Option.get >> fun s -> s.Length)
+
+    and private fold route =
+            List.fold (upsert route) Route.empty
+
+    and private upsert route s r =
+            Optic.map Route.targets_ (fun ts ->
+                (function | Some i -> update route i ts
+                          | _ -> insert route ts) (tryFindIndex ts)) s
+
+    and private update route i ts =
+            ts
+
+    and private insert route ts =
+            ts
+
+    and private tryFindIndex =
+            List.tryFindIndex (Optic.get (Prism.ofEpimorphism Target.literal_) >> Option.isSome)
+
+    and private test r =
+            []
 
 (* Targets *)
 
-let rec targets route ts =
-        targetsPartition
-    >>> templates route *** literals route
-    >>> targetsJoin
-    >>> targetsAppend ts
+[<RequireQualifiedAccess>]
+module Targets =
 
-and private targetsPartition =
-        List.partition (Optic.get uriTemplateExpression_ >> Option.isSome)
+    let rec add route ts =
+            partition
+        >>> Templates.add route *** Literals.add route
+        >>> join
+        >>> append ts
 
-and private targetsJoin =
-        fst
+    and private partition =
+            List.partition (Optic.get expression_ >> Option.isSome)
 
-and private targetsAppend =
-        List.append
+    and private join (a, b) =
+            List.append a b
+
+    and private append =
+            List.append
 
 (* Routes *)
 
-let rec routes route es ts =
-        routesPartition
-    >>> endpoints es *** targets route ts
+[<RequireQualifiedAccess>]
+module Routes =
 
-and private routesPartition =
-        List.partition (Optic.get uriTemplateParts_ >> List.isEmpty)
+    let rec add route es ts =
+            partition
+        >>> Endpoints.add es *** Targets.add route ts
+
+    and private partition =
+            List.partition (Optic.get parts_ >> List.isEmpty)
 
 (* Route *)
 
-let rec route (Route (es, ts)) =
-        routes route es ts
-    >>> Route
+[<RequireQualifiedAccess>]
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Route =
 
-(*
-
-Given a Route, and list of the routes (perhaps as remaining lists of parts, etc)
-that form the potential set of endpoints and targets for this Route:
-- Partition in to endpoints and targets - add endpoints to this Route (?)
-- Partition targets in to templates and literals, where the first part determines the split
-- For the set of templates
-  - Group by the first part
-  - For each group, repeat the overall process with a new emoty Route, and the remaining
-    routes
-
-
-*)
+    let rec add (Route (es, ts)) =
+            Routes.add add es ts
+        >>> Route
 
 (* Main *)
 
@@ -272,18 +333,18 @@ that form the potential set of endpoints and targets for this Route:
 let main _ =
 
     let routes =
-        [ 1, { Template = UriTemplate.parse "{one}"
+        [ 3, { Template = UriTemplate.parse "/users/{user}"
                Method = All
                Pipeline = Pipeline.next }
-          2, { Template = UriTemplate.parse "{one}{two}"
+          1, { Template = UriTemplate.parse "/"
                Method = All
                Pipeline = Pipeline.next }
-          3, { Template = UriTemplate.parse "{three}"
+          2, { Template = UriTemplate.parse "/users"
                Method = All
                Pipeline = Pipeline.next } ]
 
     let route =
-        route Route.empty routes
+        Route.add Route.empty routes
 
     printfn "%A" route
 

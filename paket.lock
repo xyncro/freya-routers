@@ -88,7 +88,7 @@ NUGET
     Freya.Types.Uri (3.0.0-rc01)
       FParsec (>= 1.0 < 2.0)
       Freya.Types (>= 3.0.0-rc01)
-    Freya.Types.Uri.Template (3.0.0-rc02)
+    Freya.Types.Uri.Template (3.0.0-rc03)
       FParsec (>= 1.0 < 2.0)
       Freya.Types (>= 3.0.0-rc01)
       Freya.Types.Uri (>= 3.0.0-rc01)
@@ -99,7 +99,7 @@ NUGET
     Aether (8.1.2)
     FParsec (1.0.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.3.10)
+    Hopac (0.3.11)
       FSharp.Core (>= 3.1.2.5)
   remote: http://www.myget.org/F/freya/api/v2
     Freya.Core.Hopac (3.0.0-rc02)
@@ -135,7 +135,7 @@ NUGET
   remote: http://www.nuget.org/api/v2
     Aether (8.1.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.3.10)
+    Hopac (0.3.11)
       FSharp.Core (>= 3.1.2.5)
     Unquote (3.1.2)
     xunit (2.1)
