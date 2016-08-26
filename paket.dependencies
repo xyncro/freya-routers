@@ -10,7 +10,6 @@ group Common
   nuget Freya.Types.Http         ~> 3.0.0-rc
   nuget Freya.Types.Uri          ~> 3.0.0-rc
   nuget Freya.Types.Uri.Template ~> 3.0.0-rc
-  nuget Hekate                   ~> 3
 
 group Async
 

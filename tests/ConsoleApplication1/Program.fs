@@ -5,6 +5,7 @@ open Aether.Operators
 open Anat
 open Anat.Operators
 open Freya.Core
+open Freya.Routers
 open Freya.Types.Http
 open Freya.Types.Uri
 open Freya.Types.Uri.Template
@@ -147,31 +148,19 @@ type Route =
 
  and Target =
     | Expression of Expression
-    | Strings of Strings
+    | Trie of Trie
 
     static member expression_ =
         (function | Expression t -> Some t | _ -> None), (Expression)
 
-    static member strings_ =
-        (function | Strings l -> Some l | _ -> None), (Strings)
-
-    static member expression =
-        Expression.Expression >> Expression
-
-    static member strings =
-        Strings.Strings >> Strings
+    static member trie_ =
+        (function | Trie l -> Some l | _ -> None), (Trie)
 
  and Expression =
     | Expression of Template.Expression * Route
 
- and Strings =
-    | Strings of Map<string,Route> * int
-
-    static member map_ =
-        (fun (Strings (m, _)) -> m), (fun m (Strings (_, s)) -> Strings (m, s))
-
-    static member size_ =
-        (fun (Strings (_, s)) -> s), (fun s (Strings (m, _)) -> Strings (m, s))
+ and Trie =
+    | Trie of Map<string,Route> * int
 
 (* Optics
 
@@ -179,6 +168,8 @@ type Route =
    of an int and a UriTemplateRoute. These optics are used to simplify the
    interrogation and manipulation of state in the functions used to build and
    work with the Route instance. *)
+
+(* int * UriTemplate *)
 
 let private template_ =
         snd_
@@ -197,171 +188,262 @@ let private literal_ =
         parts_
     >-> List.head_
     >?> UriTemplatePart.literal_
+    >?> Literal.literal_
 
-(* Endpoints
+(* Target *)
 
-   Functions to take an existing endpoint list and a list of int and
-   UriTemplateRoute pairs (which have been pre-selected to be logical endpoints
-   i.e. the UriTemplate defining the remaining route is empty) and return a
-   list of endpoints with the appropriate endpoints added. *)
+let private trie_ =
+        Prism.ofEpimorphism Target.trie_
 
-[<RequireQualifiedAccess>]
-module Endpoints =
+//(* Common
+//
+//   Common functions for working with data structures used in the construction
+//   of Route data. *)
+//
+//let private key =
+//        Optic.get string_ >> Option.get
+//
+//let private tail =
+//        Optic.map parts_ List.tail
+//
+//(* Endpoints
+//
+//   Functions to take an existing endpoint list and a list of int and
+//   UriTemplateRoute pairs (which have been pre-selected to be logical endpoints
+//   i.e. the UriTemplate defining the remaining route is empty) and return a
+//   list of endpoints with the appropriate endpoints added. *)
+//
+//let rec private endpoints es =
+//        List.map endpoint
+//    >>> List.append es
+//
+//and private endpoint (i, { Method = m; Pipeline = p }) =
+//        Endpoint (i, m, p)
+//
+//(* Expressions
+//
+//   Functions to take a list of int and UriTemplateRoute pairs (which have been
+//   pre-selected to be expression based for the first part of the defining
+//   UriTemplate path) and produce a list of Targets, recursively using the route
+//   function to construct appropriate sub-routes.
+//
+//   The routes are first grouped by the head expression value to simplify
+//   construction. *)
+//
+//let rec private expressions route =
+//        List.groupBy (Optic.get expression_ >> Option.get)
+//    >>> List.map (expression route)
+//
+//and private expression route (e, rs) =
+//        Target.expression (e, route Route.empty (List.map (Optic.map parts_ List.tail) rs))
+//
+//(* Strings *)
+//
+//let rec private strings route =
+//        List.sortBy (Optic.get string_ >> Option.get >> fun s -> s.Length)
+//    >>> List.fold (fun s r -> upsert route r s) []
+//
+//and private upsert route r =
+//        List.partition (Optic.get strings_ >> Option.isSome)
+//    >>> choose route r *** id
+//    >>> (fun (a, b) -> printfn "joining %A :: %A" a b; List.append a b)
+//
+//and private choose route r =
+//        function | [] ->
+//                        printfn "choose singleton %A" r
+//                        List.singleton (create route r)
+//                 | ts ->
+//                        printfn "choose map %A - %A" r ts 
+//                        List.map (update route r) ts
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//and private update route r t =
+//        Optic.map strings_ (
+//            function | Strings (m, s) ->
+//
+//                            let k = (Optic.get string_ >> Option.get) r
+//
+//                            let m2 =
+//                                (function | l when l = s ->
+//                                                printfn "adding"
+//                                                Optic.map (Map.value_ k) (
+//                                                    function | Some r' -> Some (route r' [ Optic.map parts_ List.tail r ])
+//                                                             | _ -> Some (route Route.empty [ Optic.map parts_ List.tail r ])) m
+//                                          | _ ->
+//                                                printfn "adding with diff length..."
+//
+//                                                let k2 = k.Substring (0, s)
+//
+//
+//
+//                                                Optic.map (Map.value_ k2) (
+//                                                    function | Some (Route (es, ts)) ->
+//                                                                    
+//                                                                    let r2 = Optic.map string_ (fun k -> k.Substring (s)) r
+//                                                                    
+//                                                                    Some (Route (es, ts))
+//                                                                    
+//                                                                    //Some (route rx [ r2 ])
+//                                                             | _ ->
+//                                                                    Some (route Route.empty [ Optic.map string_ (fun k -> printfn "new %s" k; k.Substring (s)) r ])) m) k.Length
+//                            
+//                            Strings (m2, s)) t
+//
+//
+//
+//
+//
+//
+//and private create route =
+//        Optic.get string_ >> Option.get &&& Optic.map parts_ List.tail
+//    >>> target route
+//
+//and private target route (k, v) =
+//        Target.strings (Map.ofList [ k, route Route.empty [ v ] ], k.Length)
+//
+//(* Targets *)
+//
+//let rec private targets route ts =
+//        List.partition (Optic.get expression_ >> Option.isSome)
+//    >>> expressions route *** strings route
+//    >>> List.join
+//    >>> List.append ts
 
-    let rec add es =
-            map ()
-        >>> append es
+//let rec private routes route es ts =
+//        List.partition (Optic.get parts_ >> List.isEmpty)
+//    >>> endpoints es *** targets route ts
 
-    and private map _ =
-            List.map (create)
+(* Route
 
-    and private append =
-            List.append
+   A function for adding a new logical route (defined by an int and
+   UriTemplateRoute pair) to an existing Route, assuming that Route is the
+   base of the routing tree structure. *)
 
-    and private create (i, { Method = m; Pipeline = p }) =
-            Endpoint (i, m, p)
+//let rec private route (Route (es, ts)) =
+//    function | i, { Method = m
+//                    Template = UriTemplate []
+//                    Pipeline = p } -> Route (endpoint i m p es, ts)
+//             | i, { Method = m
+//                    Template = UriTemplate (UriTemplatePart.Literal (Literal s) :: ps)
+//                    Pipeline = p } -> Route (es, strings i m s ps p ts)
+//             | _ -> Route (es, ts)
+//
+//and endpoint i m p es =
+//    Endpoint (i, m, p) :: es
+//
+//and strings i m s ps p =
+//        List.tryExtract strings_
+//    >>> upsert i m s ps p *** id
+//    >>> List.consPair
+//        
+//and upsert i m s ps p =
+//    function | Some r -> Target.Strings r
+//             | _ -> Target.Strings (Strings (Map.empty, 0))
 
-(* Expressions
 
-   Functions to take a list of int and UriTemplateRoute pairs (which have been
-   pre-selected to be expression based for the first part of the defining
-   UriTemplate path) and produce a list of Targets, recurively using the route
-   function to construct appropriate sub-routes.
 
-   The routes are first grouped by the head expression value to simplify
-   construction. *)
-
-[<RequireQualifiedAccess>]
-module Expressions =
-
-    let rec add route =
-            group
-        >>> map route
-
-    and private group =
-            List.groupBy (Optic.get expression_ >> Option.get)
-
-    and private map route =
-            List.map (create route)
-
-    and private routes =
-            List.map (Optic.map parts_ List.tail)
-
-    and private create route (e, rs) =
-            Target.expression (e, route Route.empty (routes rs))
-
-(* Literals *)
-
-[<RequireQualifiedAccess>]
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Strings =
-
-    let private literal_ =
-            literal_
-        >?> Literal.literal_
-
-    let rec add route =
-            sort
-        >>> fold route
-
-    and private sort =
-            List.sortBy (Optic.get literal_ >> Option.get >> fun s -> s.Length)
-
-    and private fold route =
-            List.fold (upsert route) []
-
-    and private upsert route ts r =
-            (function | Some i -> update route i r ts
-                      | _ -> insert route ts r) (tryFindIndex ts)
-
-    and private tryFindIndex =
-            List.tryFindIndex (Optic.get (Prism.ofEpimorphism Target.strings_) >> Option.isSome)
-
-    and private update route i r ts =
-            printfn "updating route"
-            ts
-
-    and private insert route ts =
-            key &&& value
-        >>> target route
-        >>> singleton
-        >>> append ts
-
-    and private target route (k, v) =
-            Target.strings (Map.ofList [ k, route Route.empty [ v ] ], k.Length)
-
-    and private key =
-            Optic.get literal_ >> Option.get
-
-    and private value =
-            Optic.map parts_ List.tail
-
-    and private singleton =
-            List.singleton
-
-    and private append =
-            List.append
-
-(* Targets *)
-
-[<RequireQualifiedAccess>]
-module Targets =
-
-    let rec add route ts =
-            partition
-        >>> Expressions.add route *** Strings.add route
-        >>> join
-        >>> append ts
-
-    and private partition =
-            List.partition (Optic.get expression_ >> Option.isSome)
-
-    and private join (a, b) =
-            List.append a b
-
-    and private append =
-            List.append
 
 (* Routes *)
 
-[<RequireQualifiedAccess>]
-module Routes =
+let rec private routes (Route (es, ts)) =
+        endpoints es &&& targets ts
+    >>> Route
 
-    let rec add route es ts =
-            partition
-        >>> Endpoints.add es *** Targets.add route ts
+(* Endpoints *)
 
-    and private partition =
-            List.partition (Optic.get parts_ >> List.isEmpty)
+and private endpoints es =
+        List.filter (Optic.get parts_ >> List.isEmpty)
+    >>> List.map endpoint
+    >>> List.append es
 
-(* Route *)
+and private endpoint (i, { Method = m; Pipeline = p }) =
+        Endpoint (i, m, p)
 
-[<RequireQualifiedAccess>]
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Route =
+(* Targets *)
 
-    let rec add (Route (es, ts)) =
-            Routes.add add es ts
-        >>> Route
+and private targets ts =
+        List.filter (Optic.get parts_ >> List.isEmpty >> not)
+    >>> flip expressions &&& flip tries
+    >>> List.pair
+    >>> List.fold (flip apply) ts
+
+(* Expressions *)
+
+and private expressions ts =
+        List.filter (Optic.get expression_ >> Option.isSome)
+    >>> List.groupBy (Optic.get expression_ >> Option.get)
+    >>> List.map (Optic.map snd_ (List.map (Optic.map parts_ List.tail)))
+    >>> List.map expression
+    >>> List.map Target.Expression
+    >>> List.append ts
+
+and private expression (e, rs) =
+        Expression (e, routes Route.empty rs)
+
+(* Tries *)
+
+and private tries ts =
+        List.filter (Optic.get literal_ >> Option.isSome)
+    >>> List.groupBy (Optic.get literal_ >> Option.get)
+    >>> List.sortBy (Optic.get fst_ >> fun s -> s.Length)
+    >>> List.map (Optic.map snd_ (List.map (Optic.map parts_ List.tail)))
+    >>> List.fold (flip upsert) ts
+
+and private upsert krs =
+        List.extract Target.trie_
+    >>> function | [ t ], ts -> Target.Trie (update krs t) :: ts
+                 | [   ], ts -> Target.Trie (insert krs) :: ts
+                 | _ -> failwith ""
+
+and private update (k, rs) =
+        function | Trie (m, s) when k.Length = s -> Trie (Optic.map (Map.value_ k) (equal rs) m, s)
+                 | Trie (m, s) -> Trie (Optic.map (Map.value_ (k.Substring (0, s))) (greater (k.Substring (s)) rs) m, s)
+
+and private equal rs =
+        function | Some r -> Some (routes r rs)
+                 | _ -> Some (routes Route.empty rs)
+
+and private greater k rs =
+        function | Some (Route (es, ts)) -> Some (Route (es, upsert (k, rs) ts))
+                 | _ -> Some (Route ([], upsert (k, rs) []))
+
+and private insert (k, rs) =
+        Trie (Map.ofList [ k, routes Route.empty rs ], k.Length)
 
 (* Main *)
 
 [<EntryPoint>]
 let main _ =
 
-    let routes =
-        [ 3, { Template = UriTemplate.parse "/users/{user}"
-               Method = All
-               Pipeline = Pipeline.next }
-          1, { Template = UriTemplate.parse "/"
+    let data =
+        [ 1, { Template = UriTemplate.parse "/"
                Method = All
                Pipeline = Pipeline.next }
           2, { Template = UriTemplate.parse "/users"
                Method = All
+               Pipeline = Pipeline.next }
+          3, { Template = UriTemplate.parse "/users/{user}"
+               Method = All
+               Pipeline = Pipeline.next }
+          4, { Template = UriTemplate.parse "/groups"
+               Method = All
+               Pipeline = Pipeline.next }
+          5, { Template = UriTemplate.parse "/groups/{group}"
+               Method = All
+               Pipeline = Pipeline.next }
+          6, { Template = UriTemplate.parse "/groups/{group}/name"
+               Method = All
                Pipeline = Pipeline.next } ]
 
     let route =
-        Route.add Route.empty routes
+        routes Route.empty data
 
     printfn "%A" route
 

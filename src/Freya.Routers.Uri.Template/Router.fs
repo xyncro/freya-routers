@@ -23,6 +23,9 @@ type UriTemplateRoutes =
       Template: UriTemplate
       Pipeline: Pipeline }
 
+    static member template_ =
+        (fun x -> x.Template), (fun t x -> { x with Template = t })
+
  and UriTemplateRouteMethod =
     | All
     | Methods of Method list

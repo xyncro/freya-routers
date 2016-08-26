@@ -75,8 +75,7 @@ module internal Request =
    structure topology. *)
 
 [<AutoOpen>]
-[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
-module internal Evaluation =
+module internal Evaluation2 =
 
     (* Traversal
 
@@ -174,7 +173,7 @@ module internal Evaluation =
        highest precedence, as measured by the order in which the routes were
        declared in the compilation phase. *)
 
-    let rec private search route =
+    let rec internal search route =
             traverse route >> select
         <!> initial
 
@@ -183,6 +182,25 @@ module internal Evaluation =
                 Traversal (method, pathAndQuery, UriTemplateData Map.empty)
         <!> Request.method
         <*> Request.pathAndQuery
+
+(* Search *)
+
+[<AutoOpen>]
+module internal Search =
+
+    let search2 _ =
+        Freya.init Unmatched
+
+
+
+
+
+
+[<AutoOpen>]
+[<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
+module internal Evaluation =
+
+    // TODO: Correct commentary
 
     (* Evaluation
 
@@ -196,4 +214,4 @@ module internal Evaluation =
     let evaluate route =
             function | Matched (data, pipe) -> Some (data, pipe)
                      | Unmatched -> None
-        <!> search route
+        <!> search2 route

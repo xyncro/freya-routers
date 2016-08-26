@@ -62,7 +62,7 @@ GROUP Build
 FRAMEWORK: >= NET45
 NUGET
   remote: http://www.nuget.org/api/v2
-    FAKE (4.37.2)
+    FAKE (4.39)
 GITHUB
   remote: xyncro/build
     build.fsx (589ed49e68b51d7de9e9de9be1adc30e26ce534d)
@@ -72,8 +72,6 @@ NUGET
     Aether (8.1.2)
     Anat (1.0)
     FParsec (1.0.2)
-    Hekate (3.2)
-      Aether (>= 8.0.2 < 9.0)
   remote: http://www.myget.org/F/freya/api/v2
     Freya.Types (3.0.0-rc01)
       FParsec (>= 1.0 < 2.0)
@@ -99,7 +97,7 @@ NUGET
     Aether (8.1.2)
     FParsec (1.0.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.3.11)
+    Hopac (0.3.13)
       FSharp.Core (>= 3.1.2.5)
   remote: http://www.myget.org/F/freya/api/v2
     Freya.Core.Hopac (3.0.0-rc02)
@@ -135,7 +133,7 @@ NUGET
   remote: http://www.nuget.org/api/v2
     Aether (8.1.2)
     FSharp.Core (4.0.0.1)
-    Hopac (0.3.11)
+    Hopac (0.3.13)
       FSharp.Core (>= 3.1.2.5)
     Unquote (3.1.2)
     xunit (2.1)
