@@ -50,63 +50,10 @@ let configuration =
 
     ManualConfig
         .Create(DefaultConfig.Instance)
-
-         // Jobs
-
-         // Legacy / Any
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.LegacyJit)
-            .With(Platform.AnyCpu))
-
-        // Ryu / Any
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.RyuJit)
-            .With(Platform.AnyCpu))
-
-        // Legacy / x86
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.LegacyJit)
-            .With(Platform.X86))
-
-        // Ryu / x86
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.RyuJit)
-            .With(Platform.X86))
-
-        // Legacy / x64
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.LegacyJit)
-            .With(Platform.X64))
-
-        // Ryu / x64
-
-        .With(Job.Default
-            .With(GarbageCollection (Server = true))
-            .With(Jit.RyuJit)
-            .With(Platform.X64))
-
-        // Diagnostics
-
-        // GC/Memory
-
+        .With(Job.ConcurrentServerGC)
+        .With(Job.AllJits)
         .With(MemoryDiagnoser ())
-
-        // Inlining
-
         .With(InliningDiagnoser ())
-
-        // Exporters
-
         .With(MarkdownExporter.GitHub)
 
 // Main

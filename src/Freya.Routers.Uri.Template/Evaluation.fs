@@ -4,6 +4,7 @@
 
 open Aether
 open Aether.Operators
+open Anat.Operators
 open FParsec
 open Freya.Core
 open Freya.Core.Operators
@@ -39,179 +40,186 @@ type internal Traversal =
 (* Request
 
    Optics and functions for working with the request to get a raw form path and
-   query value. *)
+   query value, providing logical properties for the method and path and query
+   of thre request as simple Freya typed functions. *)
 
 [<RequireQualifiedAccess>]
 module internal Request =
+
+    (* Optics *)
 
     let private queryString_ =
             State.value_<string> "owin.RequestQueryString"
         >-> Option.unsafe_
 
+    (* Utilities *)
+
     let private merge =
-        function | path, query when query <> "" -> sprintf "%s?%s" path query
-                 | path, _ -> path
+            function | path, query when query <> "" -> sprintf "%s?%s" path query
+                     | path, _ -> path
+
+    let private choose =
+            function | Some pathRaw, _, query -> merge (pathRaw, query)
+                     | _, path, query -> merge (path, query)
+
+    (* Properties *)
 
     let method =
             !. Request.method_
 
     let pathAndQuery =
             fun pathRaw path query ->
-                match pathRaw, path, query with
-                | Some pathRaw, _, query -> merge (pathRaw, query)
-                | _, path, query -> merge (path, query)
+                choose (pathRaw, path, query)
         <!> !. Request.pathRaw_
         <*> !. Request.path_
         <*> !. queryString_
 
-(* Evaluation
+(* Parsers
 
-   Evaluation of a compiled structure, finding the matching routes (where
-   present) and returning the route with the highest precedence, determined by
-   the order that the route was specified in the original list of routes.
+   Utility and pattern functions for working with parser cases within the
+   routing target data structure. *)
+
+[<AutoOpen>]
+module internal Parsers =
+
+    (* Utilities *)
+
+    let private parse (s: string) =
+        function | Success (d, _, p) -> Some (d, s.Substring (int p.Index))
+                 | _ -> None
+
+    (* Patterns *)
+
+    let (|Parser|_|) =
+        function | Target.Parser (Parser (e, r)) -> Some (e, r)
+                 | _ -> None
+
+    let (|Parse|_|) e =
+        function | s -> parse s (run (Expression.Matching.Match e) s)
+
+(* Tries
+
+   Pattern functions for working with trie cases within the routing target data
+   structure. *)
+
+[<AutoOpen>]
+module internal Tries =
+
+    (* Patterns *)
+
+    let (|Trie|_|) =
+        function | Target.Trie (Trie (rs, l)) -> Some (rs, l)
+                 | _ -> None
+
+    let (|Split|_|) l =
+        function | (s: string) when s.Length >= l -> Some (s.Substring (0, l), s.Substring (l))
+                 | _ -> None
+
+(* Search
+
+   Search (traversal and selection) of a compiled structure, finding the
+   matching routes (where present) and returning the route with the highest
+   precedence, determined by the order that the route was specified in the
+   original list of routes.
 
    The search is exhaustive and will find all matches, as it's needed to ensure
    that the order of the declarations is the deciding factor, not the sorted
    structure topology. *)
 
 [<AutoOpen>]
-module internal Evaluation2 =
+module internal Search =
 
-    (* Traversal
+    (* Literals *)
 
-       Traversal of the recursive data structure representing the routing graph
-       which effectively forms a trie. The structure is traversed exhaustively,
-       finding all matching endpoints, at which point the endpoint with the
-       highest precedence is selected and returned (if a matching endpoint is
-       found). *)
+    [<Literal>]
+    let private E =
+            ""
 
-    let rec private traverse route traversal =
-        List.concat [
-            inclusion route traversal
-            progression route traversal ]
+    (* Traverse *)
 
-    (* Inclusion
+    let rec private traverse traversal =
+            capture traversal &&& flip continue traversal
+        >>> uncurry List.append
 
-       Inclusion consists of the case where the path and query have been
-       exhausted and candidate endpoints may be included in the set of possible
-       endpoints. The endpoints are filtered using an active pattern based on
-       method match and returned along with the associated data state and the
-       precedence. *)
+    (* Capture *)
 
-    and private inclusion route =
-        function | Traversal (method, "", data) -> include method data route
-                 | _ -> []
+    and private capture =
+            function | Traversal (m, E, d) -> choose m d
+                     | _ -> reject
 
-    and private include method data =
-        function | Route (Endpoints method endpoints, _) -> List.map (fun (Endpoint (precedence, _, pipe)) -> precedence, data, pipe) endpoints
-                 | _ -> []
+    and private choose m d =
+            function | Route (es, _) -> List.choose (handle m d) es
 
-    and private (|Endpoints|_|) method =
-            List.filter (filterEndpoints method)
-         >> mapEndpoints
+    and private handle m d =
+            function | Endpoint (i, All, p) -> Some (i, d, p)
+                     | Endpoint (i, Methods ms, p) when List.contains m ms -> Some (i, d, p)
+                     | _ -> None
 
-    and private filterEndpoints method =
-        function | Endpoint (_, All, _) -> true
-                 | Endpoint (_, Methods methods, _) when List.contains method methods -> true
-                 | _ -> false
+    and private reject =
+            function | _ -> []
 
-    and private mapEndpoints =
-        function | [] -> None
-                 | endpoints -> Some endpoints
+    (* Continue *)
 
-    (* Progression
+    and private continue =
+            function | Route (_, ts) -> target >> flip List.map ts >> List.concat
 
-       Progression consists of the case where the path and query is not
-       exhausted and so the remaining matching branches are also returned given
-       the current subset of remainders which match the current path and query.
+    and private target t =
+            function | Parser (e, r) -> parser e r t
+                     | Trie (rs, l) -> trie rs l t 
+                     | _ -> []
 
-       The remainder matching and parser matching per remainder is defined as a
-       simple set of filtering active patterns. *)
+    (* Parser *)
 
-    and private progression route =
-        function | Traversal (method, uri, data) -> progress method uri data route
+    and private parser e r =
+            function | Traversal (m, Parse e (d', s), d) -> traverse (Traversal (m, s, d + d')) r
+                     | _ -> []
 
-    and private progress method uri data =
-        function | Route (_, Remainders remainders) -> (List.map (remainder method uri data) >> List.concat) remainders
-                 | _ -> []
+    (* Trie *)
 
-    and private (|Remainders|_|) =
-        function | [] -> None
-                 | remainders -> Some remainders
+    and private trie rs l =
+            function | Traversal (m, Split l (s1, s2), d) -> next m s2 d (Map.tryFind s1 rs)
+                     | _ -> []
 
-    and private remainder method uri data  =
-        function | Remainder (Match uri (uri', data'), route) -> traverse route (Traversal (method, uri', data + data'))
-                 | _ -> []
+    and private next m s d =
+            function | Some r -> traverse (Traversal (m, s, d)) r
+                     | _ -> []
 
-    and private (|Match|_|) uri =
-        function | parser -> result uri (run parser uri)
-
-    and private result uri =
-        function | Success (data, _, position) -> Some (uri.Substring (int position.Index), data)
-                 | _ -> None
-
-    (* Selection
-
-       Select the highest precedence data and pipeline pair from the given set
-       of candidates, using the supplied precedence value. *)
+    (* Select *)
 
     let rec private select =
-        function | [] -> Unmatched
-                 | endpoints -> Matched ((List.minBy orderEndpoint >> mapEndpoint) endpoints)
+            function | [] -> Unmatched
+                     | es -> Matched ((List.minBy order >> map) es)
 
-    and private orderEndpoint =
-        function | (precedence, _, _) -> precedence
+    and private order =
+            function | i, _, _ -> i
 
-    and private mapEndpoint =
-        function | (_, data, pipe) -> data, pipe
+    and private map =
+            function | _, d, p -> d, p
 
-    (* Search
-
-       Combine a list of all possible route matches and associated captured
-       data, produced by a traversal of the compiled routing graph, with a
-       selection of the matched route (data and pipeline pair) with the
-       highest precedence, as measured by the order in which the routes were
-       declared in the compilation phase. *)
+    (* Search *)
 
     let rec internal search route =
-            traverse route >> select
-        <!> initial
+            flip traverse route >> select
+        <!> init
 
-    and private initial =
+    and private init =
             fun method pathAndQuery ->
                 Traversal (method, pathAndQuery, UriTemplateData Map.empty)
         <!> Request.method
         <*> Request.pathAndQuery
 
-(* Search *)
-
-[<AutoOpen>]
-module internal Search =
-
-    let search2 _ =
-        Freya.init Unmatched
-
-
-
-
-
+(* Evaluation *)
 
 [<AutoOpen>]
 [<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module internal Evaluation =
 
-    // TODO: Correct commentary
-
     (* Evaluation
 
-       Run a search on the routing graph. In the case of a match, write any
-       captured data to the state to be interrogated later through the routing
-       lenses, and return the value of executing the matched pipeline.
-
-       In the case of a non-match, fall through to whatever follows the router
-       instance. *)
+       Run a search on the routing structure. Return an option of the data
+       matched (if any) mapping from the internal Evaluation type. *)
 
     let evaluate route =
             function | Matched (data, pipe) -> Some (data, pipe)
                      | Unmatched -> None
-        <!> search2 route
+        <!> search route
