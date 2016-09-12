@@ -9,12 +9,12 @@ open Freya.Core
 open Freya.Routers
 open Freya.Types.Uri.Template
 
-(* Types
+// Types
 
-   Types representing the elements of a compiled routing data structure, where
-   expression based elements of a URI Template are modelled directly as parsers,
-   but literal elememts are decompiled to a form of prefix trie, where the
-   length of the prefix is taken to the next endpoint available. *)
+// Types representing the elements of a compiled routing data structure, where
+// expression based elements of a URI Template are modelled directly as parsers,
+// but literal elememts are decompiled to a form of prefix trie, where the
+// length of the prefix is taken to the next endpoint available.
 
 type internal Route =
     | Route of Endpoint list * Target list
@@ -38,16 +38,16 @@ type internal Route =
  and internal Trie =
     | Trie of Map<string,Route> * int
 
-(* Compilation
+// Compilation
 
-   Functions dealing with the compilation of a list of UriTemplateRoutes to a
-   compiled Route which may then be evaluated as part of the general routing
-   functionality. *)
+// Functions dealing with the compilation of a list of UriTemplateRoutes to a
+// compiled Route which may then be evaluated as part of the general routing
+// functionality
 
 [<AutoOpen>]
 module internal Compilation =
 
-    (* Strings *)
+    // Strings
 
     let private left (k: string) l =
         k.Substring (0, l)
@@ -55,12 +55,12 @@ module internal Compilation =
     let private right (k: string) l =
         k.Substring (l)
 
-    (* Optics
+    // Optics
 
-        Optics for accessing useful properties of the basic form of a route, a
-        pair of an int and a UriTemplateRoute. These optics are used to
-        simplify the interrogation and manipulation of state in the functions
-        used to build and work with the Route instance. *)
+    // Optics for accessing useful properties of the basic form of a route, a
+    // pair of an int and a UriTemplateRoute. These optics are used to
+    // simplify the interrogation and manipulation of state in the functions
+    // used to build and work with the Route instance.
 
     let private template_ =
             snd_
@@ -81,10 +81,10 @@ module internal Compilation =
         >?> UriTemplatePart.literal_
         >?> Literal.literal_
 
-    (* Routes
+    // Routes
 
-       A function to add int and UriTemplateRoute pairs to an existing Route,
-       maintaining appropriate structure and precedence. *)
+    // A function to add int and UriTemplateRoute pairs to an existing Route,
+    // maintaining appropriate structure and precedence.
 
     // TODO: More complete commentary on these functions.
 
@@ -92,7 +92,7 @@ module internal Compilation =
             endpoints es &&& targets ts
         >>> Route
 
-    (* Endpoints *)
+    // Endpoints
 
     and private endpoints es =
             List.filter (Optic.get parts_ >> List.isEmpty)
@@ -102,7 +102,7 @@ module internal Compilation =
     and private endpoint (i, { Method = m; Pipeline = p }) =
             Endpoint (i, m, p)
 
-    (* Targets *)
+    // Targets
 
     and private targets ts =
             List.filter (Optic.get parts_ >> List.isEmpty >> not)
@@ -110,7 +110,7 @@ module internal Compilation =
         >>> List.pair
         >>> List.fold (flip apply) ts
 
-    (* Parsers *)
+    // Parsers
 
     and private parsers ts =
             List.filter (Optic.get expression_ >> Option.isSome)
@@ -123,7 +123,7 @@ module internal Compilation =
     and private parser (e, irs) =
             Parser (e, routes Route.empty irs)
 
-    (* Tries *)
+    // Tries
 
     and private tries ts =
             List.filter ((Optic.get literal_) >> Option.isSome)
@@ -153,7 +153,7 @@ module internal Compilation =
     and private insert (k, irs) =
             Trie (Map.ofList [ k, routes Route.empty irs ], k.Length)
 
-    (* Compilation *)
+    // Compilation
 
     let compile =
             List.mapi pair

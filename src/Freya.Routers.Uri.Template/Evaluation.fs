@@ -14,45 +14,45 @@ open Freya.Routers
 open Freya.Types.Http
 open Freya.Types.Uri.Template
 
-(* Types
+// Types
 
-   The core types used in routing evaluation, namely for traversal state of the
-   compiled graph and the return of a clear result to evaluation function. *)
+// The core types used in routing evaluation, namely for traversal state of the
+// compiled graph and the return of a clear result to evaluation function.
 
-(* Evaluation
+// Evaluation
 
-   The result of routing evaluation, including matched data and the associated
-   pipeline to run in the case where a route was matched. *)
+// The result of routing evaluation, including matched data and the associated
+// pipeline to run in the case where a route was matched.
 
 type internal Evaluation =
     | Matched of UriTemplateData * Pipeline
     | Unmatched
 
-(* Traversal
+// Traversal
 
-   State and carried data as part of the traversal of a compiled routing graph,
-   including optics to provide lens based modification of the traversal while
-   in progress. *)
+// State and carried data as part of the traversal of a compiled routing graph,
+// including optics to provide lens based modification of the traversal while
+// in progress.
 
 type internal Traversal =
     | Traversal of Method * string * UriTemplateData
 
-(* Request
+// Request
 
-   Optics and functions for working with the request to get a raw form path and
-   query value, providing logical properties for the method and path and query
-   of thre request as simple Freya typed functions. *)
+// Optics and functions for working with the request to get a raw form path and
+// query value, providing logical properties for the method and path and query
+// of thre request as simple Freya typed functions.
 
 [<RequireQualifiedAccess>]
 module internal Request =
 
-    (* Optics *)
+    // Optics
 
     let private queryString_ =
             State.value_<string> "owin.RequestQueryString"
         >-> Option.unsafe_
 
-    (* Utilities *)
+    // Utilities
 
     let private merge =
             function | path, query when query <> "" -> sprintf "%s?%s" path query
@@ -62,7 +62,7 @@ module internal Request =
             function | Some pathRaw, _, query -> merge (pathRaw, query)
                      | _, path, query -> merge (path, query)
 
-    (* Properties *)
+    // Properties
 
     let method =
             !. Request.method_
@@ -74,21 +74,21 @@ module internal Request =
         <*> !. Request.path_
         <*> !. queryString_
 
-(* Parsers
+// Parsers
 
-   Utility and pattern functions for working with parser cases within the
-   routing target data structure. *)
+// Utility and pattern functions for working with parser cases within the
+// routing target data structure.
 
 [<AutoOpen>]
 module internal Parsers =
 
-    (* Utilities *)
+    // Utilities
 
     let private parse (s: string) =
         function | Success (d, _, p) -> Some (d, s.Substring (int p.Index))
                  | _ -> None
 
-    (* Patterns *)
+    // Patterns
 
     let (|Parser|_|) =
         function | Target.Parser (Parser (e, r)) -> Some (e, r)
@@ -97,15 +97,15 @@ module internal Parsers =
     let (|Parse|_|) e =
         function | s -> parse s (run (Expression.Matching.Match e) s)
 
-(* Tries
+// Tries
 
-   Pattern functions for working with trie cases within the routing target data
-   structure. *)
+// Pattern functions for working with trie cases within the routing target data
+// structure.
 
 [<AutoOpen>]
 module internal Tries =
 
-    (* Patterns *)
+    // Patterns
 
     let (|Trie|_|) =
         function | Target.Trie (Trie (rs, l)) -> Some (rs, l)
@@ -115,33 +115,33 @@ module internal Tries =
         function | (s: string) when s.Length >= l -> Some (s.Substring (0, l), s.Substring (l))
                  | _ -> None
 
-(* Search
+// Search
 
-   Search (traversal and selection) of a compiled structure, finding the
-   matching routes (where present) and returning the route with the highest
-   precedence, determined by the order that the route was specified in the
-   original list of routes.
+// Search (traversal and selection) of a compiled structure, finding the
+// matching routes (where present) and returning the route with the highest
+// precedence, determined by the order that the route was specified in the
+// original list of routes.
 
-   The search is exhaustive and will find all matches, as it's needed to ensure
-   that the order of the declarations is the deciding factor, not the sorted
-   structure topology. *)
+// The search is exhaustive and will find all matches, as it's needed to ensure
+// that the order of the declarations is the deciding factor, not the sorted
+// structure topology.
 
 [<AutoOpen>]
 module internal Search =
 
-    (* Literals *)
+    // Literals
 
     [<Literal>]
     let private E =
             ""
 
-    (* Traverse *)
+    // Traverse
 
     let rec private traverse traversal =
             capture traversal &&& flip continue traversal
         >>> uncurry List.append
 
-    (* Capture *)
+    // Capture
 
     and private capture =
             function | Traversal (m, E, d) -> choose m d
@@ -158,7 +158,7 @@ module internal Search =
     and private reject =
             function | _ -> []
 
-    (* Continue *)
+    // Continue
 
     and private continue =
             function | Route (_, ts) -> target >> flip List.map ts >> List.concat
@@ -168,13 +168,13 @@ module internal Search =
                      | Trie (rs, l) -> trie rs l t 
                      | _ -> []
 
-    (* Parser *)
+    // Parser
 
     and private parser e r =
             function | Traversal (m, Parse e (d', s), d) -> traverse (Traversal (m, s, d + d')) r
                      | _ -> []
 
-    (* Trie *)
+    // Trie
 
     and private trie rs l =
             function | Traversal (m, Split l (s1, s2), d) -> next m s2 d (Map.tryFind s1 rs)
@@ -184,7 +184,7 @@ module internal Search =
             function | Some r -> traverse (Traversal (m, s, d)) r
                      | _ -> []
 
-    (* Select *)
+    // Select
 
     let rec private select =
             function | [] -> Unmatched
@@ -196,7 +196,7 @@ module internal Search =
     and private map =
             function | _, d, p -> d, p
 
-    (* Search *)
+    // Search
 
     let rec internal search route =
             flip traverse route >> select
@@ -208,16 +208,16 @@ module internal Search =
         <!> Request.method
         <*> Request.pathAndQuery
 
-(* Evaluation *)
+// Evaluation
 
 [<AutoOpen>]
 [<CompilationRepresentation (CompilationRepresentationFlags.ModuleSuffix)>]
 module internal Evaluation =
 
-    (* Evaluation
+    // Evaluation
 
-       Run a search on the routing structure. Return an option of the data
-       matched (if any) mapping from the internal Evaluation type. *)
+    // Run a search on the routing structure. Return an option of the data
+    // matched (if any) mapping from the internal Evaluation type.
 
     let evaluate route =
             function | Matched (data, pipe) -> Some (data, pipe)

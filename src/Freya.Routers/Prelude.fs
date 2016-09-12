@@ -2,9 +2,9 @@
 
 open Aether
 
-(* Prelude *)
+// Prelude
 
-(* Functions *)
+// Functions
 
 [<AutoOpen>]
 module Functions =
@@ -18,7 +18,7 @@ module Functions =
     let uncurry f (a, b) =
         f a b
 
-(* List *)
+// List
 
 [<RequireQualifiedAccess>]
 module List =
@@ -31,7 +31,7 @@ module List =
      >> function | [], xs -> [], xs
                  | ys, xs -> List.map (Optic.get (Prism.ofEpimorphism e) >> Option.get) ys, xs
 
-(* Option *)
+// Option
 
 [<RequireQualifiedAccess>]
 module Option =

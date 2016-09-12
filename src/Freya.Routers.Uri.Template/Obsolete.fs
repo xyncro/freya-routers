@@ -2,12 +2,12 @@
 
 open System
 
-(* Obsolete
+// Obsolete
 
-   Backwards compatibility shims to make the 2.x-> 3.x transition
-   less painful, providing functionally equivalent options where possible.
+// Backwards compatibility shims to make the 2.x-> 3.x transition
+// less painful, providing functionally equivalent options where possible.
 
-   To be removed for 4.x releases. *)
+// To be removed for 4.x releases.
 
 [<AutoOpen>]
 module Obsolete =

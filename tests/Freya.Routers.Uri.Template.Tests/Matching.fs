@@ -9,11 +9,10 @@ open Freya.Testing
 open Freya.Testing.Operators
 open Freya.Types.Http
 open Xunit
+//* Matching
 
-(* Matching
-
-   Tests covering basic matching of routes to paths and methods. Capture of
-   matched variables is tested explicitly elsewhere. *)
+// Tests covering basic matching of routes to paths and methods. Capture of
+// matched variables is tested explicitly elsewhere.
 
 [<Fact>]
 let ``Router With Root Route Executes Correctly`` () =
