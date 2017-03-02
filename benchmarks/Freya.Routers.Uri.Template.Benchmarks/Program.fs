@@ -1,6 +1,8 @@
-﻿// Freya
+﻿module Freya.Routers.Uri.Template.Benchmarks
+// Freya
 
 open Freya.Core
+open Freya.Core.Optics
 open Freya.Routers.Uri.Template
 
 let value i =
@@ -42,7 +44,10 @@ type Benchmarks () =
 // Configuration
 
 open BenchmarkDotNet.Configs
+open BenchmarkDotNet.Diagnosers
+#if !NETCOREAPP1_1
 open BenchmarkDotNet.Diagnostics.Windows
+#endif
 open BenchmarkDotNet.Exporters
 open BenchmarkDotNet.Jobs
 
@@ -50,10 +55,12 @@ let configuration =
 
     ManualConfig
         .Create(DefaultConfig.Instance)
-        .With(Job.ConcurrentServerGC)
-        .With(Job.AllJits)
-        .With(MemoryDiagnoser ())
+        .With(Job.MediumRun.WithGcServer(true).WithGcConcurrent(true))
+        .With(MemoryDiagnoser.Default)
+#if !NETCOREAPP1_1
         .With(InliningDiagnoser ())
+#else
+#endif
         .With(MarkdownExporter.GitHub)
 
 // Main
