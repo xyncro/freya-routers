@@ -45,7 +45,7 @@ type Benchmarks () =
 
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Diagnosers
-#if !NETCOREAPP1_1
+#if !NETCOREAPP2_0
 open BenchmarkDotNet.Diagnostics.Windows
 #endif
 open BenchmarkDotNet.Exporters
@@ -57,7 +57,7 @@ let configuration =
         .Create(DefaultConfig.Instance)
         .With(Job.MediumRun.WithGcServer(true).WithGcConcurrent(true))
         .With(MemoryDiagnoser.Default)
-#if !NETCOREAPP1_1
+#if !NETCOREAPP2_0
         .With(InliningDiagnoser ())
 #else
 #endif

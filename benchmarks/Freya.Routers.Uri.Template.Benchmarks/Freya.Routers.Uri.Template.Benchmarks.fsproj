@@ -1,16 +1,14 @@
-<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <DefineConstants>$(DefineConstants);NETCOREAPP1_1</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCOREAPP2_0</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="FSharp.Core" Version="4.*" />
     <PackageReference Include="Aether" Version="[8.2.0,9)" />
     <PackageReference Include="Freya.Types.Http" Version="[4.0.0-alpha-*,5)" />
     <PackageReference Include="Freya.Types.Uri.Template" Version="[4.0.0-alpha-*,5)" />

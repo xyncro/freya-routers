@@ -1,4 +1,4 @@
-<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>A Freya Router based on URI Templates for route matching</Description>
     <PackageTags>$(PackageTags);uri;template</PackageTags>
