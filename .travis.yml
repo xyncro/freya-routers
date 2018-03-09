@@ -23,11 +23,11 @@ matrix:
 script: 
   - dotnet --info
   - dotnet restore
-  - dotnet build -c Release"
+  - dotnet build -c Release
   - dotnet test -c Release tests\Freya.Routers.Uri.Template.Hopac.Tests\Freya.Routers.Uri.Template.Hopac.Tests.fsproj
   - dotnet test -c Release tests\Freya.Routers.Uri.Template.Tests\Freya.Routers.Uri.Template.Tests.fsproj
   - dotnet benchmarks\Freya.Routers.Uri.Template.Benchmarks\bin\Release\netcoreapp2.0\Freya.Routers.Uri.Template.Benchmarks.dll
-  - dotnet pack -c Release --include-symbols"
+  - dotnet pack -c Release --include-symbols
 
 branches:
   except:
