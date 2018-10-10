@@ -2,7 +2,6 @@
 // Freya
 
 open Freya.Core
-open Freya.Core.Optics
 open Freya.Routers.Uri.Template
 
 let value i =
@@ -23,7 +22,7 @@ let system =
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Running
 open Freya.Optics.Http
-open Freya.Testing
+open Freya.Testing.Evaluation
 
 let path p =
     freya {
