@@ -19,6 +19,7 @@ if ($env:appveyor){
 dotnet build -c Release freya-routers.sln /p:Version=$version$versionSuffix
 dotnet test --no-build -c Release tests/Freya.Routers.Uri.Template.Tests/Freya.Routers.Uri.Template.Tests.fsproj
 dotnet test --no-build -c Release tests/Freya.Routers.Uri.Template.Hopac.Tests/Freya.Routers.Uri.Template.Hopac.Tests.fsproj
+dotnet pack --no-build -c Release src/Freya.Routers /p:Version=$version$versionSuffix -o $psscriptroot/bin
 dotnet pack --no-build -c Release src/Freya.Routers.Uri.Template /p:Version=$version$versionSuffix -o $psscriptroot/bin
 dotnet pack --no-build -c Release src/Freya.Routers.Uri.Template.Hopac /p:Version=$version$versionSuffix -o $psscriptroot/bin
 dotnet benchmarks/Freya.Routers.Uri.Template.Benchmarks/bin/Release/netcoreapp2.1/Freya.Routers.Uri.Template.Benchmarks.dll
