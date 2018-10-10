@@ -5,9 +5,9 @@
     <Compile Include="Matching.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Freya.Testing" Version="[4.0.0-alpha-*,5)" />
-    <PackageReference Include="Freya.Core" Version="[4.0.0-alpha-*,5)" />
-    <PackageReference Include="Freya.Optics.Http" Version="[4.0.0-alpha-*,5)" />
+    <PackageReference Include="Freya.Testing" Version="[4.0.*,5)" />
+    <PackageReference Include="Freya.Core" Version="[4.0.*,5)" />
+    <PackageReference Include="Freya.Optics.Http" Version="[4.0.*,5)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Freya.Routers.Uri.Template\Freya.Routers.Uri.Template.fsproj" />
